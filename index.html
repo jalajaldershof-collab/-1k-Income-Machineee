@@ -1,41 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-       <script>
-function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
-  return null;
-}
+        <script>
+        // Button ko select karein
+        const button = document.getElementById('purchaseBtn');
 
-function generateEventId() {
-  return 'evt_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
-}
+        // Button click hone par yeh function chalega
+        button.addEventListener('click', async () => {
+            try {
+                // Netlify serverless function ko data bhejein
+                const response = await fetch('/.Netlify/Functions/sendevent', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        event_name: 'Purchase',
+                        event_id: 'order_' + Date.now(), // Unique ID taaki data duplicate na ho
+                        user_data: {
+                            // Meta ko data bhejne se pehle email ko hash (SHA-256) karna zaroori hai
+                            // Yeh "user@example.com" ka hashed version hai
+                            em: ['f660ab912ec121d1b1e928a0bb4bc61b15f5ad44d5efdc4e1c92a25e99b8e44a'] 
+                        },
+                        custom_data: { 
+                            currency: 'INR', 
+                            value: 2500.00 
+                        }
+                    })
+                });
 
-function trackConversion(eventName) {
-  const eventId = generateEventId();
+                const data = await response.json();
+                console.log('Meta CAPI Response:', data);
+                alert('Event Sent Successfully!');
 
-  // 1. Fire Pixel (client-side) with the SAME event_id
-  fbq('track', eventName, {}, { eventID: eventId });
-
-  // 2. Fire Conversion API (server-side) via your Netlify function
-  fetch('/.netlify/functions/sendevent', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      eventName: eventName,
-      eventId: eventId,
-      eventSourceUrl: window.location.href,
-      userData: {
-        client_user_agent: navigator.userAgent,
-        fbp: getCookie('_fbp'),
-        fbc: getCookie('_fbc'),
-      },
-    }),
-  });
-}
-</script>
+            } catch (error) {
+                console.error('Error sending event:', error);
+            }
+        });
+    </script>
        
        <!-- Meta Pixel Code -->
 <script>
@@ -1072,7 +1074,7 @@ src="https://www.facebook.com/tr?id=1044826331840770&ev=PageView&noscript=1"
                 <span>30-day money back guarantee. If it doesn't work for you, get a full refund.</span>
             </div>
             <a href="#" class="btn-primary" style="font-size: 1.4rem; padding: 18px 50px; width: 100%; max-width: 400px; margin: 0 auto;">
-                <i class="fas fa-lock" style="margin-right: 10px;" onclick="trackConversion('InitiateCheckout')"></i> Get the System — $17
+                <i id="purchaseBtn" class="fas fa-lock" style="margin-right: 10px;" ></i> Get the System — $17
             </a>
             <p style="color: #444; font-size: 0.8rem; margin-top: 20px;">Secure checkout · Instant digital access · No hidden fees</p>
         </div>
