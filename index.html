@@ -18,6 +18,41 @@ fbq('track', 'PageView');
 src="https://www.facebook.com/tr?id=1044826331840770&ev=PageView&noscript=1"
 /></noscript>
 <!-- End Meta Pixel Code -->
+    <script>
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+}
+
+function generateEventId() {
+  return 'evt_' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
+}
+
+function trackConversion(eventName) {
+  const eventId = generateEventId();
+
+  // 1. Fire Pixel (client-side) with the SAME event_id
+  fbq('track', eventName, {}, { eventID: eventId });
+
+  // 2. Fire Conversion API (server-side) via your Netlify function
+  fetch('/.netlify/functions/send-event', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      eventName: eventName,
+      eventId: eventId,
+      eventSourceUrl: window.location.href,
+      userData: {
+        client_user_agent: navigator.userAgent,
+        fbp: getCookie('_fbp'),
+        fbc: getCookie('_fbc'),
+      },
+    }),
+  });
+}
+</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>$1K Income Machine — First Customer System</title>
