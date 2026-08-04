@@ -37,7 +37,7 @@ function trackConversion(eventName) {
   fbq('track', eventName, {}, { eventID: eventId });
 
   // 2. Fire Conversion API (server-side) via your Netlify function
-  fetch('/.netlify/functions/sendevent', {
+  fetch('/.netlify/functions/sendevent.js', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
