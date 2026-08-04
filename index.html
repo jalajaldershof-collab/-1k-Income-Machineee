@@ -27,7 +27,7 @@ async function initiateCheckout() {
   });
 
   // Server (Conversion API)
-  await fetch('/.netlify/functions/sendEvent', {
+  await fetch('/.netlify/functions/sendevent', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
