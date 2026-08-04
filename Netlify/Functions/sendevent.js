@@ -23,7 +23,7 @@ exports.handler = async (event) => {
       ],
     };
 
-    const url = `https://graph.facebook.com/v19.0/${pixelId}/events?access_token=${accessToken}`;
+    const url = `https://graph.facebook.com/v23.0/${pixelId}/events?access_token=${accessToken}`;
 
     const response = await fetch(url, {
       method: "POST",
