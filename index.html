@@ -301,7 +301,46 @@ src="https://www.facebook.com/tr?id=1690917758676510&ev=PageView&noscript=1"
             padding: 16px 0 8px 0;
         }
 
-        .carousel-dot {
+        .proof-section{
+    text-align:center;
+    padding:60px 20px;
+}
+
+.proof-section h2{
+    font-size:2rem;
+    margin-bottom:10px;
+}
+
+.proof-section p{
+    color:#bdbdbd;
+    margin-bottom:35px;
+}
+
+.proof-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:24px;
+}
+
+.proof-card{
+    background:#151515;
+    border:1px solid rgba(255,255,255,.12);
+    border-radius:18px;
+    padding:10px;
+}
+
+.proof-card img{
+    width:100%;
+    display:block;
+    border-radius:12px;
+}
+
+@media (max-width:768px){
+    .proof-grid{
+        grid-template-columns:1fr;
+    }
+}
+           .carousel-dot {
             width: 10px;
             height: 10px;
             border-radius: 50%;
@@ -837,13 +876,7 @@ src="https://www.facebook.com/tr?id=1690917758676510&ev=PageView&noscript=1"
                         <span>Slide 5 — Replace with your image</span>
                     </div>
                 </div>
-                <!-- Slide 6 -->
-                <div class="carousel-slide">
-                    <div class="slide-placeholder">
-                        <i class="fas fa-image"></i>
-                        <span>Slide 6 — Replace with your image</span>
-                    </div>
-                </div>
+                
             </div>
             <!-- Carousel Controls -->
             <button class="carousel-btn prev" id="prevBtn"><i class="fas fa-chevron-left"></i></button>
@@ -877,88 +910,40 @@ src="https://www.facebook.com/tr?id=1690917758676510&ev=PageView&noscript=1"
     <!-- Reviews Section (Real reviews) -->
     <section id="reviews" class="reviews-section container">
         <h2 class="section-title" style="text-align: center;">What Real Creators Are Saying</h2>
-        <p class="section-sub" style="text-align: center;">Real reviews from people who used the First Customer System to get their first sales.</p>
+        <p class="section-sub" style="text-align: center;">Real reviews Screenshots from people who used the First Customer System to get their first sales.</p>
 
         <div class="review-grid">
             <!-- Review 1 -->
-            <div class="review-card">
-                <div class="card-header">
-                    <div class="user">
-                        <div class="avatar">JD</div>
-                        <div class="user-info">
-                            <h4>Jamie D.</h4>
-                            <span class="handle">@jamiecreates</span>
-                        </div>
-                    </div>
-                    <div class="card-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                </div>
-                <span class="product-tag"><i class="fas fa-check-circle"></i> 1 month ago</span>
-                <p>"This was exactly what I needed to get started. Clear, actionable, and it worked right away."</p>
-                <div class="card-footer">
-                    <span class="likes"><i class="fas fa-heart"></i> 34</span>
-                    <a href="#" class="product-link">Read full review →</a>
-                </div>
-            </div>
 
-            <!-- Review 2 -->
-            <div class="review-card">
-                <div class="card-header">
-                    <div class="user">
-                        <div class="avatar">MR</div>
-                        <div class="user-info">
-                            <h4>Marcus R.</h4>
-                            <span class="handle">@marcuscoach</span>
-                        </div>
-                    </div>
-                    <div class="card-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                </div>
-                <span class="product-tag"><i class="fas fa-check-circle"></i> 4 months ago</span>
-                <p>"Helped me scale my digital product business from zero. The Reddit playbook alone was worth it."</p>
-                <div class="card-footer">
-                    <span class="likes"><i class="fas fa-heart"></i> 28</span>
-                    <a href="#" class="product-link">Read full review →</a>
-                </div>
-            </div>
+    <div class="proof-grid">
 
-            <!-- Review 3 -->
-            <div class="review-card">
-                <div class="card-header">
-                    <div class="user">
-                        <div class="avatar">SN</div>
-                        <div class="user-info">
-                            <h4>Sarah N.</h4>
-                            <span class="handle">@sarahdigital</span>
-                        </div>
-                    </div>
-                    <div class="card-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                </div>
-                <span class="product-tag"><i class="fas fa-check-circle"></i> 4 months ago</span>
-                <p>"Honestly wasn't sure at first, but this surprised me. Helped me figure out my niche and validate demand before I built anything. Made around $500 so far."</p>
-                <div class="card-footer">
-                    <span class="likes"><i class="fas fa-heart"></i> 42</span>
-                    <a href="#" class="product-link">Read full review →</a>
-                </div>
-            </div>
+        <div class="proof-card">
+             <h3>Closed 4 Clients in One Day</h3>
+    <p>Using the exact outreach system from this course.</p>   
+            <img src="assets/review4.png" alt="Review 1">
+        </div>
 
-            <!-- Review 4 -->
-            <div class="review-card">
-                <div class="card-header">
-                    <div class="user">
-                        <div class="avatar">AL</div>
-                        <div class="user-info">
-                            <h4>Alex L.</h4>
-                            <span class="handle">@alexcreates</span>
-                        </div>
-                    </div>
-                    <div class="card-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                </div>
-                <span class="product-tag"><i class="fas fa-check-circle"></i> 6 months ago</span>
-                <p>"It was helpful, clear and to the point. No fluff, just a system that works if you follow the steps."</p>
-                <div class="card-footer">
-                    <span class="likes"><i class="fas fa-heart"></i> 19</span>
-                    <a href="#" class="product-link">Read full review →</a>
-                </div>
-            </div>
+        <div class="proof-card">
+             <h3>Closed 4 Clients in One Day</h3>
+    <p>Using the exact outreach system from this course.</p>
+               <img src="assets/review4.png" alt="Review 2">
+        </div>
+
+        <div class="proof-card">
+             <h3>Closed 4 Clients in One Day</h3>
+    <p>Using the exact outreach system from this course.</p>
+               <img src="assets/review4.png" alt="Review 3">
+        </div>
+
+        <div class="proof-card">
+             <h3>Closed 4 Clients in One Day</h3>
+    <p>Using the exact outreach system from this course.</p>
+               <img src="Assets/review4.png" alt="Review 4">
+        </div>
+
+    </div>
+
+</section>
         </div>
     </section>
 
