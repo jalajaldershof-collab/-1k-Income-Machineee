@@ -1154,35 +1154,148 @@
             }
         }
 
-        // Checkout function with heroic confirmation
-        function checkout() {
-            const total = document.getElementById('totalPrice').textContent;
-            const selected = [];
-            if (selectedUpsell1) selected.push('🚀 Launch Prompt & Templates');
-            if (selectedUpsell2) selected.push('💎 Premium Upgrade');
+        <script>
+    // Prices
+    const basePrice = 17;
+    const upsell1Price = 47;
+    const upsell2Price = 67;
 
-            let message = `⚡ ORDER SUMMARY\n`;
-            message += `━━━━━━━━━━━━━━━━━━━━\n`;
-            message += `📦 First Customer System (included)\n`;
-            if (selected.length > 0) {
-                message += `+ ${selected.join('\n+ ')}\n`;
-            }
-            message += `━━━━━━━━━━━━━━━━━━━━\n`;
-            message += `💰 Total: $${total}\n\n`;
-            message += `🔒 Ready to secure your order?`;
+    let selectedUpsell1 = false;
+    let selectedUpsell2 = false;
 
-            if (confirm(message)) {
-                const btn = document.querySelector('.btn-primary');
-                btn.textContent = '⏳ Processing...';
-                btn.style.opacity = '0.7';
-                setTimeout(() => {
-                    alert('🎉 Congratulations! Your order has been secured.\n\nYou now have everything you need to get your first customers fast.');
-                    btn.textContent = '✅ Order Secured!';
-                    btn.style.opacity = '1';
-                    // window.location.href = 'your-checkout-url.com';
-                }, 1000);
-            }
+    // ============================================
+    // CHECKOUT REDIRECT LOGIC
+    // ============================================
+    // ⚠️ REPLACE THESE URLs WITH YOUR ACTUAL CHECKOUT PAGES
+    const CHECKOUT_URLS = {
+        none: 'https://whop.com/c/first-customer-blueprint/1',     // No upsell selected
+        upsell1: 'https://your-checkout-page-2.com',  // Only Upsell 1 selected
+        upsell2: 'https://your-checkout-page-3.com',  // Only Upsell 2 selected
+        both: 'https://your-checkout-page-4.com'      // Both upsells selected
+    };
+
+    function checkout() {
+        const hasUpsell1 = selectedUpsell1;
+        const hasUpsell2 = selectedUpsell2;
+        
+        const total = document.getElementById('totalPrice').textContent;
+        const selected = [];
+        if (hasUpsell1) selected.push('🚀 Launch Prompt & Templates');
+        if (hasUpsell2) selected.push('💎 Premium Upgrade');
+        
+        let message = `⚡ ORDER SUMMARY\n`;
+        message += `━━━━━━━━━━━━━━━━━━━━\n`;
+        message += `📦 First Customer System (included)\n`;
+        if (selected.length > 0) {
+            message += `+ ${selected.join('\n+ ')}\n`;
         }
+        message += `━━━━━━━━━━━━━━━━━━━━\n`;
+        message += `💰 Total: $${total}\n\n`;
+        message += `🔒 Ready to secure your order?`;
+
+        if (confirm(message)) {
+            let redirectUrl = '';
+            
+            if (hasUpsell1 && hasUpsell2) {
+                redirectUrl = CHECKOUT_URLS.both;
+            } else if (hasUpsell1 && !hasUpsell2) {
+                redirectUrl = CHECKOUT_URLS.upsell1;
+            } else if (!hasUpsell1 && hasUpsell2) {
+                redirectUrl = CHECKOUT_URLS.upsell2;
+            } else {
+                redirectUrl = CHECKOUT_URLS.none;
+            }
+
+            const btn = document.querySelector('.btn-primary');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Redirecting...';
+            btn.style.opacity = '0.7';
+            btn.disabled = true;
+
+            setTimeout(() => {
+                window.location.href = redirectUrl;
+            }, 800);
+        }
+    }
+
+    // Toggle function for upsells
+    function toggleUpsell(tileId, checkboxId, price) {
+        const tile = document.getElementById(tileId);
+        const checkbox = document.getElementById(checkboxId);
+
+        if (tileId === 'upsell1') {
+            selectedUpsell1 = !selectedUpsell1;
+            checkbox.classList.toggle('selected');
+            updateTotal();
+        } else if (tileId === 'upsell2') {
+            selectedUpsell2 = !selectedUpsell2;
+            checkbox.classList.toggle('selected');
+            updateTotal();
+        }
+    }
+
+    // Update total price with animation
+    function updateTotal() {
+        let total = basePrice;
+        let savings = 0;
+
+        if (selectedUpsell1) {
+            total += upsell1Price;
+            savings += (147 - upsell1Price);
+        }
+
+        if (selectedUpsell2) {
+            total += upsell2Price;
+            savings += (197 - upsell2Price);
+        }
+
+        let originalTotal = basePrice;
+        if (selectedUpsell1) originalTotal += 147;
+        if (selectedUpsell2) originalTotal += 197;
+
+        const totalSavings = originalTotal - total;
+
+        const priceElement = document.getElementById('totalPrice');
+        priceElement.style.transform = 'scale(1.15)';
+        setTimeout(() => {
+            priceElement.style.transform = 'scale(1)';
+        }, 200);
+
+        priceElement.textContent = total;
+
+        const savingsDisplay = document.getElementById('savingsDisplay');
+        if (totalSavings > 0) {
+            savingsDisplay.innerHTML = `<i class="fas fa-tag" style="margin-right: 6px;"></i> You save $${totalSavings}`;
+            savingsDisplay.style.display = 'inline-block';
+        } else {
+            savingsDisplay.innerHTML = `<i class="fas fa-tag" style="margin-right: 6px;"></i> You save $0`;
+        }
+    }
+
+    // Make checkbox clickable via the tile
+    document.querySelectorAll('.upsell-tile').forEach(tile => {
+        tile.addEventListener('click', function(e) {
+            if (e.target.closest('.selection-checkbox')) return;
+            const id = this.id;
+            if (id === 'upsell1') {
+                toggleUpsell('upsell1', 'checkbox1', 10);
+            } else if (id === 'upsell2') {
+                toggleUpsell('upsell2', 'checkbox2', 27);
+            }
+        });
+    });
+
+    // Add CSS animation for savings pulse
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
 
         // Make checkbox clickable via the tile
         document.querySelectorAll('.upsell-tile').forEach(tile => {
