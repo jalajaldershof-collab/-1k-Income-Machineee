@@ -1369,7 +1369,7 @@ function initiateUpsellCheckout() {
     </footer>
 
     <!-- JavaScript for Upsell Selection & Dynamic Pricing -->
-    <script>
+<script>
     // Prices
     const basePrice = 17;
     const upsell1Price = 10;
@@ -1393,56 +1393,46 @@ function initiateUpsellCheckout() {
         const hasUpsell1 = selectedUpsell1;
         const hasUpsell2 = selectedUpsell2;
         
-        const total = document.getElementById('totalPrice').textContent;
-        const selected = [];
-        if (hasUpsell1) selected.push('🚀 Launch Prompt & Templates');
-        if (hasUpsell2) selected.push('💎 Premium Upgrade');
+        let redirectUrl = '';
         
-        let message = `⚡ ORDER SUMMARY\n`;
-        message += `━━━━━━━━━━━━━━━━━━━━\n`;
-        message += `📦 First Customer System (included)\n`;
-        if (selected.length > 0) {
-            message += `+ ${selected.join('\n+ ')}\n`;
+        if (hasUpsell1 && hasUpsell2) {
+            redirectUrl = CHECKOUT_URLS.both;
+        } else if (hasUpsell1 && !hasUpsell2) {
+            redirectUrl = CHECKOUT_URLS.upsell1;
+        } else if (!hasUpsell1 && hasUpsell2) {
+            redirectUrl = CHECKOUT_URLS.upsell2;
+        } else {
+            redirectUrl = CHECKOUT_URLS.none;
         }
-        message += `━━━━━━━━━━━━━━━━━━━━\n`;
-        message += `💰 Total: $${total}\n\n`;
-        message += `🔒 Ready to secure your order?`;
 
-        if (confirm(message)) {
-            let redirectUrl = '';
-            
-            if (hasUpsell1 && hasUpsell2) {
-                redirectUrl = CHECKOUT_URLS.both;
-            } else if (hasUpsell1 && !hasUpsell2) {
-                redirectUrl = CHECKOUT_URLS.upsell1;
-            } else if (!hasUpsell1 && hasUpsell2) {
-                redirectUrl = CHECKOUT_URLS.upsell2;
-            } else {
-                redirectUrl = CHECKOUT_URLS.none;
-            }
+        // Show loading state on button
+        const btn = document.querySelector('.btn-primary');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '⏳ Redirecting...';
+        btn.style.opacity = '0.7';
+        btn.disabled = true;
 
-            const btn = document.querySelector('.btn-primary');
-            btn.innerHTML = '⏳ Redirecting...';
-            btn.style.opacity = '0.7';
-            btn.disabled = true;
-
-            setTimeout(() => {
-                window.location.href = redirectUrl;
-            }, 800);
-        }
+        // Redirect immediately
+        window.location.href = redirectUrl;
     }
 
     // ============================================
-    // TOGGLE UPSELL FUNCTION - FIXED
+    // TOGGLE UPSELL FUNCTION
     // ============================================
     function toggleUpsell(tileId, checkboxId) {
         // Toggle the selection state
         if (tileId === 'upsell1') {
             selectedUpsell1 = !selectedUpsell1;
-            document.getElementById(checkboxId).classList.toggle('selected');
+            const checkbox = document.getElementById(checkboxId);
+            if (checkbox) {
+                checkbox.classList.toggle('selected');
+            }
         } else if (tileId === 'upsell2') {
             selectedUpsell2 = !selectedUpsell2;
-            document.getElementById(checkboxId).classList.toggle('selected');
+            const checkbox = document.getElementById(checkboxId);
+            if (checkbox) {
+                checkbox.classList.toggle('selected');
+            }
         }
         updateTotal();
     }
@@ -1469,24 +1459,27 @@ function initiateUpsellCheckout() {
         const totalSavings = originalTotal - total;
 
         const priceElement = document.getElementById('totalPrice');
-        priceElement.style.transform = 'scale(1.15)';
-        setTimeout(() => {
-            priceElement.style.transform = 'scale(1)';
-        }, 200);
-
-        priceElement.textContent = total;
+        if (priceElement) {
+            priceElement.style.transform = 'scale(1.15)';
+            setTimeout(() => {
+                priceElement.style.transform = 'scale(1)';
+            }, 200);
+            priceElement.textContent = total;
+        }
 
         const savingsDisplay = document.getElementById('savingsDisplay');
-        if (totalSavings > 0) {
-            savingsDisplay.innerHTML = `<i class="fas fa-tag" style="margin-right: 6px;"></i> You save $${totalSavings}`;
-            savingsDisplay.style.display = 'inline-block';
-        } else {
-            savingsDisplay.innerHTML = `<i class="fas fa-tag" style="margin-right: 6px;"></i> You save $0`;
+        if (savingsDisplay) {
+            if (totalSavings > 0) {
+                savingsDisplay.innerHTML = `<i class="fas fa-tag" style="margin-right: 6px;"></i> You save $${totalSavings}`;
+                savingsDisplay.style.display = 'inline-block';
+            } else {
+                savingsDisplay.innerHTML = `<i class="fas fa-tag" style="margin-right: 6px;"></i> You save $0`;
+            }
         }
     }
 
     // ============================================
-    // EVENT LISTENERS - FIXED
+    // EVENT LISTENERS
     // ============================================
     // Wait for the page to load
     document.addEventListener('DOMContentLoaded', function() {
@@ -1508,10 +1501,9 @@ function initiateUpsellCheckout() {
             });
         });
 
-        // Make checkboxes clickable (this overrides the tile click for the checkbox area)
+        // Make checkboxes clickable
         document.querySelectorAll('.selection-checkbox').forEach(function(checkbox) {
             checkbox.addEventListener('click', function(e) {
-                // Stop the click from bubbling up to the tile
                 e.stopPropagation();
                 
                 const tile = this.closest('.upsell-tile');
@@ -1526,25 +1518,6 @@ function initiateUpsellCheckout() {
             });
         });
 
-        // Also make the inline onclick attributes work (for backwards compatibility)
-        // But we'll override them with our event listeners
-        const checkbox1 = document.getElementById('checkbox1');
-        const checkbox2 = document.getElementById('checkbox2');
-        
-        if (checkbox1) {
-            checkbox1.onclick = function(e) {
-                e.stopPropagation();
-                toggleUpsell('upsell1', 'checkbox1');
-            };
-        }
-        
-        if (checkbox2) {
-            checkbox2.onclick = function(e) {
-                e.stopPropagation();
-                toggleUpsell('upsell2', 'checkbox2');
-            };
-        }
-
         // Initial price update
         updateTotal();
     });
@@ -1557,18 +1530,15 @@ function initiateUpsellCheckout() {
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
-        /* Ensure checkbox has proper cursor */
         .selection-checkbox {
             cursor: pointer !important;
         }
-        /* Ensure tile has proper cursor */
         .upsell-tile {
             cursor: pointer !important;
         }
     `;
     document.head.appendChild(style);
 
-    // For debugging - check state in console
     console.log('Upsell page loaded! Click a tile or checkbox to select.');
 </script>
 </body>
