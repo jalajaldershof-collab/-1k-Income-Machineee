@@ -1,6 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    
+    <!-- Meta Pixel Code -->
+    <script>
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '1690917758676510');
+        fbq('track', 'PageView');
+    </script>
+
+    <script>
+function initiateUpsellCheckout() {
+    fbq('track', 'InitiateCheckout', {
+        content_name: 'First Customer System',
+        content_type: 'product',
+        currency: 'USD'
+    });
+}
+</script>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>$1K Income Machine — Epic Upsell</title>
@@ -1047,7 +1072,7 @@
                 <i class="fas fa-tag" style="margin-right: 6px;"></i> You save $0
             </div>
             <div class="cta-wrapper">
-                <button class="btn-primary" onclick="checkout()">
+                <button class="btn-primary" onclick="initiateUpsellCheckout()" onclick="checkout()">
                     <i class="fas fa-lock" style="margin-right: 12px;"></i> Secure Your Order
                 </button>
             </div>
