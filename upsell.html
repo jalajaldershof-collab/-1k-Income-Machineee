@@ -965,6 +965,219 @@ function initiateUpsellCheckout() {
                 padding: 20px;
             }
         }
+
+        /* ===== BOTTOM SECTION - IMAGE + STORY PAIRS ===== */
+.bottom-section {
+    margin: 35px 0 45px 0;
+}
+
+.section-headline {
+    margin-bottom: 40px;
+}
+
+.section-headline .section-title {
+    font-size: 2rem;
+    font-weight: 900;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, #ffffff 0%, #69f0ae 50%, #82b1ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 60px rgba(0, 200, 83, 0.15);
+}
+
+.section-headline .section-sub {
+    color: #aaaaaa;
+    font-size: 1.1rem;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+/* Image + Story Pair */
+.image-story-pair {
+    margin-bottom: 10px;
+}
+
+.image-tile {
+    background: linear-gradient(145deg, #0d0d0d, #080808);
+    border-radius: 32px;
+    padding: 35px;
+    border: 1px solid rgba(42, 42, 42, 0.5);
+    box-shadow: 0 15px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 200, 83, 0.03);
+    transition: all 0.5s ease;
+    display: flex;
+    gap: 35px;
+    align-items: center;
+}
+
+.image-tile:hover {
+    border-color: rgba(0, 200, 83, 0.2);
+    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(0, 200, 83, 0.06);
+    transform: translateY(-4px);
+}
+
+.bottom-image {
+    flex: 1;
+    min-width: 200px;
+    height: 220px;
+    border-radius: 20px;
+    background: #111111;
+    border: 1px solid #2a2a2a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5), 0 8px 30px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.bottom-image::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.2) 100%);
+    pointer-events: none;
+}
+
+.bottom-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: relative;
+    z-index: 0;
+}
+
+.bottom-image .placeholder {
+    color: #444;
+    font-size: 0.9rem;
+    text-align: center;
+    z-index: 1;
+    position: absolute;
+}
+
+.bottom-image .placeholder i {
+    font-size: 3rem;
+    color: #333;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.story-content {
+    flex: 2;
+    min-width: 200px;
+}
+
+.story-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 10px;
+    letter-spacing: -0.3px;
+}
+
+.story-title i {
+    color: #69f0ae;
+}
+
+.story-text {
+    color: #bbbbbb;
+    font-size: 1rem;
+    line-height: 1.8;
+    margin-bottom: 14px;
+}
+
+.story-author {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #888888;
+    font-size: 0.9rem;
+    padding-top: 12px;
+    border-top: 1px solid rgba(42, 42, 42, 0.3);
+}
+
+.story-author i {
+    font-size: 1.4rem;
+}
+
+.story-author strong {
+    color: #ffffff;
+}
+
+/* Divider between pairs */
+.story-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 200, 83, 0.15), transparent);
+    margin: 30px 0;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+    .image-tile {
+        flex-direction: column;
+        padding: 24px;
+    }
+
+    .bottom-image {
+        width: 100%;
+        height: 180px;
+        min-width: unset;
+    }
+
+    .story-content {
+        width: 100%;
+        min-width: unset;
+    }
+
+    .story-title {
+        font-size: 1.1rem;
+    }
+
+    .story-text {
+        font-size: 0.95rem;
+    }
+
+    .section-headline .section-title {
+        font-size: 1.6rem;
+    }
+
+    .section-headline .section-sub {
+        font-size: 1rem;
+    }
+
+    .story-divider {
+        margin: 20px 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .image-tile {
+        padding: 18px;
+        border-radius: 24px;
+    }
+
+    .bottom-image {
+        height: 150px;
+    }
+
+    .story-title {
+        font-size: 1rem;
+    }
+
+    .story-text {
+        font-size: 0.9rem;
+    }
+
+    .story-author {
+        font-size: 0.8rem;
+        flex-wrap: wrap;
+    }
+
+    .section-headline .section-title {
+        font-size: 1.3rem;
+    }
+}
+        
     </style>
 </head>
 <body>
@@ -1079,25 +1292,80 @@ function initiateUpsellCheckout() {
         </div>
     </section>
 
-    <!-- Bottom Image Section (Heroic) -->
-    <section class="bottom-section container">
+    <!-- ===== BOTTOM SECTION (Updated with Image + Story pairs) ===== -->
+<section class="bottom-section container">
+    <!-- Headline at the top -->
+    <div class="section-headline">
+        <h2 class="section-title" style="text-align: center; font-size: 2rem; margin-bottom: 8px;">
+            🔥 The <span style="color: #69f0ae;">"Unfair Advantage"</span> Bundle
+        </h2>
+        <p class="section-sub" style="text-align: center; margin-bottom: 30px; font-size: 1.1rem;">
+            Most creators who get all three products see results <strong style="color: #ffffff;">5x faster</strong>.
+        </p>
+    </div>
+
+    <!-- Image + Story Pair 1 -->
+    <div class="image-story-pair">
         <div class="image-tile">
             <div class="bottom-image">
-                <img src="Assets/bottom-image.png" alt="Bonus Content">
+                <img src="Assets/bottom-image-1.png" alt="Success Story 1">
+                <!-- Fallback placeholder if image not found -->
+                <div class="placeholder" style="display: none;">
+                    <i class="fas fa-image"></i>
+                    <span>Image 1</span>
+                </div>
             </div>
-            <div class="caption">
-                <strong style="color: #69f0ae;">🔥 The "Unfair Advantage" Bundle:</strong> Most creators who get all three products see results <strong style="color: #ffffff;">5x faster</strong>. The system works exponentially better when you have the complete arsenal. Don't leave money on the table.
+            <div class="story-content">
+                <h3 class="story-title">From Zero to First Customer in 48 Hours</h3>
+                <p class="story-text">
+                    "I was stuck with zero customers for months. I bought the First Customer System, 
+                    followed the steps, and within 48 hours I had my first paying customer. 
+                    The Reddit playbook alone was worth 10x the price."
+                </p>
+                <div class="story-author">
+                    <i class="fas fa-user-circle" style="color: #69f0ae;"></i>
+                    <span><strong>Sarah Mitchell</strong> — Digital Course Creator</span>
+                </div>
             </div>
         </div>
-    </section>
+    </div>
+
+    <!-- Divider between pairs -->
+    <div class="story-divider"></div>
+
+    <!-- Image + Story Pair 2 -->
+    <div class="image-story-pair">
+        <div class="image-tile">
+            <div class="bottom-image">
+                <img src="Assets/bottom-image-2.png" alt="Success Story 2">
+                <!-- Fallback placeholder if image not found -->
+                <div class="placeholder" style="display: none;">
+                    <i class="fas fa-image"></i>
+                    <span>Image 2</span>
+                </div>
+            </div>
+            <div class="story-content">
+                <h3 class="story-title">How I Made $500 in My First Week</h3>
+                <p class="story-text">
+                    "Honestly wasn't sure at first, but this actually surprised me. 
+                    It helped me figure out my niche and showed me how to check if people actually want 
+                    what I'm selling before I wasted time building it. Made around $500 so far."
+                </p>
+                <div class="story-author">
+                    <i class="fas fa-user-circle" style="color: #69f0ae;"></i>
+                    <span><strong>Marcus Rodriguez</strong> — Coach & Consultant</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Optional: Add more pairs by copying the .image-story-pair block -->
+</section>
 
     <!-- Footer -->
     <footer>
         <div class="container">
             <div class="footer-links">
-                <a href="#">Privacy Policy</a>
-                <a href="#">Contact Support</a>
-                <a href="#">Refund Policy</a>
             </div>
             <p>© 2026 $1K Income Machine. All rights reserved. Made with <i class="fas fa-heart footer-heart"></i> for creators who refuse to settle.</p>
         </div>
