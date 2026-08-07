@@ -13,8 +13,26 @@
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
         fbq('init', '1690917758676510');
-        fbq('track', 'Purchase');
+        fbq('track', 'PageView');
     </script>
+
+     <script>
+if (!sessionStorage.getItem('purchase_event_fired')) {
+
+    fbq('track', 'Purchase', {
+        value: 17.00,
+        currency: 'USD',
+        content_name: 'First Customer System',
+        content_ids: ['FCS-001'],
+        content_type: 'product',
+        num_items: 1
+    });
+
+    sessionStorage.setItem('purchase_event_fired', 'true');
+
+    console.log('Meta Purchase event fired successfully.');
+}
+</script>
     
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
