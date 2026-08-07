@@ -355,6 +355,8 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            position: relative;
+            z-index: 0;
         }
 
         .main-product .product-image .placeholder {
@@ -362,6 +364,7 @@
             font-size: 1rem;
             text-align: center;
             z-index: 1;
+            position: absolute;
         }
 
         .main-product .product-image .placeholder i {
@@ -531,6 +534,8 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            position: relative;
+            z-index: 0;
         }
 
         .upsell-tile .tile-image .placeholder {
@@ -538,6 +543,7 @@
             font-size: 0.9rem;
             text-align: center;
             z-index: 1;
+            position: absolute;
         }
 
         .upsell-tile .tile-image .placeholder i {
@@ -781,6 +787,8 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            position: relative;
+            z-index: 0;
         }
 
         .bottom-section .image-tile .bottom-image .placeholder {
@@ -788,6 +796,7 @@
             font-size: 0.9rem;
             text-align: center;
             z-index: 1;
+            position: absolute;
         }
 
         .bottom-section .image-tile .bottom-image .placeholder i {
@@ -952,9 +961,6 @@
     <section class="main-product container">
         <div class="product-tile" id="mainProduct">
             <div class="product-image">
-                <div class="placeholder">
-                    <i class="fas fa-image"></i>
-                </div>
                 <img src="Assets/firstcustomerblueprint.png" alt="First Customer System"> 
             </div>
             <div class="product-info">
@@ -988,12 +994,7 @@
                     <i class="fas fa-check"></i>
                 </div>
                 <div class="tile-image">
-                    <div class="placeholder">
-                        <i class="fas fa-image"></i>
-                        <span>Upsell 1 Image</span>
-                        <span style="font-size: 0.7rem; color: #555; display: block; margin-top: 4px;">(Replace with your image)</span>
-                    </div>
-                    <!-- <img src="your-upsell-1-image.jpg" alt="Launch Prompt & Templates"> -->
+                    <img src="Assets/upsell1.png" alt="Launch Prompt & Templates">
                 </div>
                 <span class="tile-badge gold"><i class="fas fa-crown"></i> Best Seller</span>
                 <h3>Launch Prompt & 6-Figure Templates</h3>
@@ -1009,18 +1010,13 @@
                 </ul>
             </div>
 
-            <!-- Upsell 2 (Blank - you fill in) -->
+            <!-- Upsell 2 -->
             <div class="upsell-tile" id="upsell2">
                 <div class="selection-checkbox" id="checkbox2" onclick="toggleUpsell('upsell2', 'checkbox2', 27)">
                     <i class="fas fa-check"></i>
                 </div>
                 <div class="tile-image">
-                    <div class="placeholder">
-                        <i class="fas fa-plus-circle"></i>
-                        <span>Your Upsell 2</span>
-                        <span style="font-size: 0.7rem; color: #555; display: block; margin-top: 4px;">(Add your image & details)</span>
-                    </div>
-                    <!-- <img src="your-upsell-2-image.jpg" alt="Upsell 2"> -->
+                    <img src="Assets/upsell2.png" alt="Premium Add-on">
                 </div>
                 <span class="tile-badge"><i class="fas fa-gem"></i> Premium Add-on</span>
                 <h3>Your Upsell Title Here</h3>
@@ -1062,12 +1058,7 @@
     <section class="bottom-section container">
         <div class="image-tile">
             <div class="bottom-image">
-                <div class="placeholder">
-                    <i class="fas fa-image"></i>
-                    <span>Bottom Section Image</span>
-                    <span style="font-size: 0.7rem; color: #555; display: block; margin-top: 4px;">(Replace with your image)</span>
-                </div>
-                <!-- <img src="your-bottom-image.jpg" alt="Bonus Content"> -->
+                <img src="Assets/bottom-image.png" alt="Bonus Content">
             </div>
             <div class="caption">
                 <strong style="color: #69f0ae;">🔥 The "Unfair Advantage" Bundle:</strong> Most creators who get all three products see results <strong style="color: #ffffff;">5x faster</strong>. The system works exponentially better when you have the complete arsenal. Don't leave money on the table.
@@ -1089,76 +1080,10 @@
 
     <!-- JavaScript for Upsell Selection & Dynamic Pricing -->
     <script>
-        // Prices
-        const basePrice = 17;
-        const upsell1Price = 10;
-        const upsell2Price = 27;
-
-        let selectedUpsell1 = false;
-        let selectedUpsell2 = false;
-
-        // Toggle function for upsells
-        function toggleUpsell(tileId, checkboxId, price) {
-            const tile = document.getElementById(tileId);
-            const checkbox = document.getElementById(checkboxId);
-
-            if (tileId === 'upsell1') {
-                selectedUpsell1 = !selectedUpsell1;
-                checkbox.classList.toggle('selected');
-                updateTotal();
-            } else if (tileId === 'upsell2') {
-                selectedUpsell2 = !selectedUpsell2;
-                checkbox.classList.toggle('selected');
-                updateTotal();
-            }
-        }
-
-        // Update total price with animation
-        function updateTotal() {
-            let total = basePrice;
-            let savings = 0;
-
-            if (selectedUpsell1) {
-                total += upsell1Price;
-                savings += (147 - upsell1Price);
-            }
-
-            if (selectedUpsell2) {
-                total += upsell2Price;
-                savings += (197 - upsell2Price);
-            }
-
-            let originalTotal = basePrice;
-            if (selectedUpsell1) originalTotal += 147;
-            if (selectedUpsell2) originalTotal += 197;
-
-            const totalSavings = originalTotal - total;
-
-            // Animate price change
-            const priceElement = document.getElementById('totalPrice');
-            priceElement.style.transform = 'scale(1.15)';
-            priceElement.style.color = '#69f0ae';
-            setTimeout(() => {
-                priceElement.style.transform = 'scale(1)';
-            }, 200);
-
-            priceElement.textContent = total;
-
-            const savingsDisplay = document.getElementById('savingsDisplay');
-            if (totalSavings > 0) {
-                savingsDisplay.innerHTML = `<i class="fas fa-tag" style="margin-right: 6px;"></i> You save $${totalSavings}`;
-                savingsDisplay.style.display = 'inline-block';
-                savingsDisplay.style.animation = 'pulse 0.5s ease';
-            } else {
-                savingsDisplay.innerHTML = `<i class="fas fa-tag" style="margin-right: 6px;"></i> You save $0`;
-            }
-        }
-
-        <script>
     // Prices
     const basePrice = 17;
-    const upsell1Price = 47;
-    const upsell2Price = 67;
+    const upsell1Price = 10;
+    const upsell2Price = 27;
 
     let selectedUpsell1 = false;
     let selectedUpsell2 = false;
@@ -1207,7 +1132,6 @@
             }
 
             const btn = document.querySelector('.btn-primary');
-            const originalText = btn.innerHTML;
             btn.innerHTML = '⏳ Redirecting...';
             btn.style.opacity = '0.7';
             btn.disabled = true;
@@ -1218,20 +1142,19 @@
         }
     }
 
-    // Toggle function for upsells
-    function toggleUpsell(tileId, checkboxId, price) {
-        const tile = document.getElementById(tileId);
-        const checkbox = document.getElementById(checkboxId);
-
+    // ============================================
+    // TOGGLE UPSELL FUNCTION - FIXED
+    // ============================================
+    function toggleUpsell(tileId, checkboxId) {
+        // Toggle the selection state
         if (tileId === 'upsell1') {
             selectedUpsell1 = !selectedUpsell1;
-            checkbox.classList.toggle('selected');
-            updateTotal();
+            document.getElementById(checkboxId).classList.toggle('selected');
         } else if (tileId === 'upsell2') {
             selectedUpsell2 = !selectedUpsell2;
-            checkbox.classList.toggle('selected');
-            updateTotal();
+            document.getElementById(checkboxId).classList.toggle('selected');
         }
+        updateTotal();
     }
 
     // Update total price with animation
@@ -1272,17 +1195,68 @@
         }
     }
 
-    // Make checkbox clickable via the tile
-    document.querySelectorAll('.upsell-tile').forEach(tile => {
-        tile.addEventListener('click', function(e) {
-            if (e.target.closest('.selection-checkbox')) return;
-            const id = this.id;
-            if (id === 'upsell1') {
-                toggleUpsell('upsell1', 'checkbox1', 10);
-            } else if (id === 'upsell2') {
-                toggleUpsell('upsell2', 'checkbox2', 27);
-            }
+    // ============================================
+    // EVENT LISTENERS - FIXED
+    // ============================================
+    // Wait for the page to load
+    document.addEventListener('DOMContentLoaded', function() {
+        
+        // Make the entire tile clickable (but NOT the checkbox inside it)
+        document.querySelectorAll('.upsell-tile').forEach(function(tile) {
+            tile.addEventListener('click', function(e) {
+                // If the click was on the checkbox or its children, ignore it
+                if (e.target.closest('.selection-checkbox')) {
+                    return;
+                }
+                
+                const id = this.id;
+                if (id === 'upsell1') {
+                    toggleUpsell('upsell1', 'checkbox1');
+                } else if (id === 'upsell2') {
+                    toggleUpsell('upsell2', 'checkbox2');
+                }
+            });
         });
+
+        // Make checkboxes clickable (this overrides the tile click for the checkbox area)
+        document.querySelectorAll('.selection-checkbox').forEach(function(checkbox) {
+            checkbox.addEventListener('click', function(e) {
+                // Stop the click from bubbling up to the tile
+                e.stopPropagation();
+                
+                const tile = this.closest('.upsell-tile');
+                if (tile) {
+                    const id = tile.id;
+                    if (id === 'upsell1') {
+                        toggleUpsell('upsell1', 'checkbox1');
+                    } else if (id === 'upsell2') {
+                        toggleUpsell('upsell2', 'checkbox2');
+                    }
+                }
+            });
+        });
+
+        // Also make the inline onclick attributes work (for backwards compatibility)
+        // But we'll override them with our event listeners
+        const checkbox1 = document.getElementById('checkbox1');
+        const checkbox2 = document.getElementById('checkbox2');
+        
+        if (checkbox1) {
+            checkbox1.onclick = function(e) {
+                e.stopPropagation();
+                toggleUpsell('upsell1', 'checkbox1');
+            };
+        }
+        
+        if (checkbox2) {
+            checkbox2.onclick = function(e) {
+                e.stopPropagation();
+                toggleUpsell('upsell2', 'checkbox2');
+            };
+        }
+
+        // Initial price update
+        updateTotal();
     });
 
     // Add CSS animation for savings pulse
@@ -1293,40 +1267,19 @@
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
+        /* Ensure checkbox has proper cursor */
+        .selection-checkbox {
+            cursor: pointer !important;
+        }
+        /* Ensure tile has proper cursor */
+        .upsell-tile {
+            cursor: pointer !important;
+        }
     `;
     document.head.appendChild(style);
+
+    // For debugging - check state in console
+    console.log('Upsell page loaded! Click a tile or checkbox to select.');
 </script>
-
-        // Make checkbox clickable via the tile
-        document.querySelectorAll('.upsell-tile').forEach(tile => {
-            tile.addEventListener('click', function(e) {
-                if (e.target.closest('.selection-checkbox')) return;
-                const checkbox = this.querySelector('.selection-checkbox');
-                const id = this.id;
-                if (id === 'upsell1') {
-                    toggleUpsell('upsell1', 'checkbox1', 47);
-                } else if (id === 'upsell2') {
-                    toggleUpsell('upsell2', 'checkbox2', 67);
-                }
-            });
-        });
-
-        // Add CSS animation for savings pulse
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes pulse {
-                0% { transform: scale(1); }
-                50% { transform: scale(1.05); }
-                100% { transform: scale(1); }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Pre-select Upsell 1 for higher conversion
-        setTimeout(() => {
-            // Uncomment below to have Upsell 1 pre-selected
-            // toggleUpsell('upsell1', 'checkbox1', 47);
-        }, 300);
-    </script>
 </body>
 </html>
