@@ -19,6 +19,11 @@
     /></noscript>
     <!-- End Meta Pixel Code -->
 
+    <script>
+function trackConversion(eventName) {
+    zaraz.track(eventName);
+}
+</script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -284,7 +289,7 @@
         <h1>The <span class="highlight">First Customer</span> System<br>Get Your First Paying Customer in 72 Hours</h1>
         <p>Stop waiting and hoping. This is the proven system that identifies, attracts, and converts your first buyers — <strong>without ads, without a big audience, and without being pushy</strong>.</p>
         <div onclick="trackConversion('SubscribedButtonClickt')" class="cta-group">
-            <a href="#cta" class="btn-primary"><i class="fas fa-rocket" style="margin-right:10px;"></i> Get Instant Access — $17</a>
+            <a href="upsell.html" onclick="trackConversion('SubscribedButtonClickt')" class="btn-primary"><i class="fas fa-rocket" style="margin-right:10px;"></i> Get Instant Access — $17</a>
             <a href="#product" class="btn-secondary">See What's Inside</a>
         </div>
     </section>
@@ -481,7 +486,7 @@
         <div class="icon"><i class="fas fa-check-circle"></i></div>
         <h2>You Made the Right Decision!</h2>
         <p>Your First Customer System is ready. Check your email for instant access.</p>
-        <a href="#" class="btn-primary" style="font-size:1.2rem; padding:16px 40px;">Access Your System</a>
+        <a href="upsell.html" onclick="trackConversion('SubscribedButtonClickt')" class="btn-primary" style="font-size:1.2rem; padding:16px 40px;">Access Your System</a>
     </div>
 
     <!-- Final CTA -->
