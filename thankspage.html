@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 
-     <!-- Meta Pixel Code -->
+    <!-- Meta Pixel Code -->
     <script>
         !function(f,b,e,v,n,t,s)
         {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -12,28 +12,258 @@
         t.src=v;s=b.getElementsByTagName(e)[0];
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '1690917758676510');
-        fbq('track', 'PageView');
+        
+        // Initialize with user data from localStorage
+        (function initPixel() {
+            const getFbc = () => {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    const [name, value] = cookie.trim().split('=');
+                    if (name === '_fbc') {
+                        return value;
+                    }
+                }
+                return null;
+            };
+
+            const getFbp = () => {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    const [name, value] = cookie.trim().split('=');
+                    if (name === '_fbp') {
+                        return value;
+                    }
+                }
+                return null;
+            };
+
+            fbq('init', '1690917758676510', {
+                em: localStorage.getItem('user_email') || undefined,
+                ph: localStorage.getItem('user_phone') || undefined,
+                fn: localStorage.getItem('user_first_name') || undefined,
+                ln: localStorage.getItem('user_last_name') || undefined,
+                ct: localStorage.getItem('user_city') || undefined,
+                st: localStorage.getItem('user_state') || undefined,
+                zp: localStorage.getItem('user_zip') || undefined,
+                country: localStorage.getItem('user_country') || undefined,
+                external_id: localStorage.getItem('user_id') || undefined,
+                client_ip_address: '{{client_ip_address}}',
+                client_user_agent: navigator.userAgent,
+                fbp: getFbp() || undefined,
+                fbc: getFbc() || undefined
+            });
+
+            // Track PageView
+            fbq('track', 'PageView', {
+                content_name: 'First Customer System - Thank You',
+                content_category: 'Digital Product',
+                content_type: 'product'
+            }, {
+                eventID: 'pageview_thankyou_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+            });
+        })();
+    </script>
+    <noscript>
+        <img height="1" width="1" style="display:none"
+            src="https://www.facebook.com/tr?id=1690917758676510&ev=PageView&noscript=1"
+        />
+    </noscript>
+    <!-- End Meta Pixel Code -->
+
+    <!-- Zaraz Tracking Function -->
+    <script>
+        // Function to get fbc from cookie (preserve original case)
+        function getFbc() {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === '_fbc') {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+        // Function to get fbp from cookie
+        function getFbp() {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === '_fbp') {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+        // Enhanced trackConversion function
+        function trackConversion(eventName, eventData = {}) {
+            const userData = {
+                email: localStorage.getItem('user_email') || '',
+                phone: localStorage.getItem('user_phone') || '',
+                firstName: localStorage.getItem('user_first_name') || '',
+                lastName: localStorage.getItem('user_last_name') || '',
+                city: localStorage.getItem('user_city') || '',
+                state: localStorage.getItem('user_state') || '',
+                zip: localStorage.getItem('user_zip') || '',
+                country: localStorage.getItem('user_country') || '',
+                userId: localStorage.getItem('user_id') || ''
+            };
+
+            const trackingData = {
+                event_name: eventName,
+                user_data: {
+                    em: userData.email || undefined,
+                    ph: userData.phone || undefined,
+                    fn: userData.firstName || undefined,
+                    ln: userData.lastName || undefined,
+                    ct: userData.city || undefined,
+                    st: userData.state || undefined,
+                    zp: userData.zip || undefined,
+                    country: userData.country || undefined,
+                    external_id: userData.userId || undefined,
+                    client_ip_address: '{{client_ip_address}}',
+                    client_user_agent: navigator.userAgent,
+                    fbp: getFbp() || undefined,
+                    fbc: getFbc() || undefined
+                },
+                custom_data: {
+                    ...eventData,
+                    event_source_url: window.location.href,
+                    page_title: document.title
+                },
+                event_id: eventName + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+            };
+
+            // Send to Zaraz
+            if (typeof zaraz !== 'undefined' && zaraz.track) {
+                zaraz.track(eventName, trackingData);
+            }
+
+            // Send via Facebook Pixel
+            if (typeof fbq !== 'undefined') {
+                fbq('track', eventName, {
+                    ...eventData,
+                    em: userData.email || undefined,
+                    ph: userData.phone || undefined,
+                    fn: userData.firstName || undefined,
+                    ln: userData.lastName || undefined,
+                    ct: userData.city || undefined,
+                    st: userData.state || undefined,
+                    zp: userData.zip || undefined,
+                    country: userData.country || undefined,
+                    external_id: userData.userId || undefined,
+                    fbp: getFbp() || undefined,
+                    fbc: getFbc() || undefined
+                }, {
+                    eventID: trackingData.event_id
+                });
+            }
+
+            return trackingData;
+        }
+
+        // ============================================
+        // PURCHASE EVENT - FIRES ON PAGE LOAD (ONCE)
+        // ============================================
+        (function firePurchaseEvent() {
+            // Check if purchase event already fired in this session
+            if (sessionStorage.getItem('purchase_event_fired')) {
+                console.log('Purchase event already fired in this session. Skipping.');
+                return;
+            }
+
+            // Get order data from localStorage (set in upsell.html)
+            let orderData = {};
+            try {
+                const storedData = localStorage.getItem('order_data');
+                if (storedData) {
+                    orderData = JSON.parse(storedData);
+                }
+            } catch (e) {
+                console.warn('Could not parse order data:', e);
+            }
+
+            // Get total value - always $17 for the base product
+            // Even if they bought upsells, we only track the base product value
+            const baseValue = 17.00;
+            
+            // Get content IDs - always include the base product
+            const contentIds = ['FCS-001'];
+            
+            // Check if they selected upsells (for tracking purposes only)
+            const hasUpsell1 = orderData.selectedUpsell1 || false;
+            const hasUpsell2 = orderData.selectedUpsell2 || false;
+            
+            // Build contents array with base product only
+            const contents = [
+                { id: 'FCS-001', quantity: 1, item_price: 17.00 }
+            ];
+
+            // If upsells were selected, add them to contents for tracking but keep value at $17
+            if (hasUpsell1) {
+                contents.push({ id: 'FCS-UPS-001', quantity: 1, item_price: 0 }); // $0 because we're not tracking upsell value
+                contentIds.push('FCS-UPS-001');
+            }
+            if (hasUpsell2) {
+                contents.push({ id: 'FCS-UPS-002', quantity: 1, item_price: 0 }); // $0 because we're not tracking upsell value
+                contentIds.push('FCS-UPS-002');
+            }
+
+            // Prepare Purchase event data
+            const purchaseData = {
+                value: baseValue, // Always $17
+                currency: 'USD',
+                content_name: 'First Customer System',
+                content_ids: contentIds,
+                content_type: 'product',
+                num_items: contentIds.length,
+                contents: contents,
+                order_id: 'order_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                status: 'completed',
+                payment_method: 'stripe'
+            };
+
+            console.log('🔥 Firing Purchase event with data:', purchaseData);
+
+            // Fire the purchase event
+            trackConversion('Purchase', purchaseData);
+
+            // Mark as fired in session storage
+            sessionStorage.setItem('purchase_event_fired', 'true');
+            
+            // Also store the order ID for reference
+            localStorage.setItem('last_order_id', purchaseData.order_id);
+
+            console.log('✅ Purchase event fired successfully!');
+        })();
+
+        // Function to set user data (call this when user provides info)
+        function setUserData(userData) {
+            Object.keys(userData).forEach(key => {
+                localStorage.setItem('user_' + key, userData[key]);
+            });
+        }
+
+        // Function to get fbclid from URL and store it
+        function storeFbclid() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const fbclid = urlParams.get('fbclid');
+            if (fbclid) {
+                document.cookie = '_fbc=' + fbclid + '; path=/; max-age=7776000';
+                localStorage.setItem('fbclid', fbclid);
+            }
+        }
+
+        // Store fbclid when page loads
+        storeFbclid();
+
+        // Expose functions globally
+        window.trackConversion = trackConversion;
+        window.setUserData = setUserData;
+        window.storeFbclid = storeFbclid;
     </script>
 
-     <script>
-if (!sessionStorage.getItem('purchase_event_fired')) {
-
-    fbq('track', 'Purchase', {
-        value: 17.00,
-        currency: 'USD',
-        content_name: 'First Customer System',
-        content_ids: ['FCS-001'],
-        content_type: 'product',
-        num_items: 1
-    });
-
-    sessionStorage.setItem('purchase_event_fired', 'true');
-
-    console.log('Meta Purchase event fired successfully.');
-}
-</script>
-    
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>$1K Income Machine — Thank You</title>
@@ -626,7 +856,6 @@ if (!sessionStorage.getItem('purchase_event_fired')) {
                 
                 // Add click tracking (optional)
                 ctaBtn.addEventListener('click', function(e) {
-                    // You can add analytics tracking here if needed
                     console.log('Product access clicked!');
                 });
             }
