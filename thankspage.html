@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <!-- Meta Pixel Code -->
     <script>
         !function(f,b,e,v,n,t,s)
@@ -13,7 +12,6 @@
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
         
-        // Initialize with user data from localStorage
         (function initPixel() {
             const getFbc = () => {
                 const cookies = document.cookie.split(';');
@@ -38,22 +36,12 @@
             };
 
             fbq('init', '1690917758676510', {
-                em: localStorage.getItem('user_email') || undefined,
-                ph: localStorage.getItem('user_phone') || undefined,
-                fn: localStorage.getItem('user_first_name') || undefined,
-                ln: localStorage.getItem('user_last_name') || undefined,
-                ct: localStorage.getItem('user_city') || undefined,
-                st: localStorage.getItem('user_state') || undefined,
-                zp: localStorage.getItem('user_zip') || undefined,
-                country: localStorage.getItem('user_country') || undefined,
-                external_id: localStorage.getItem('user_id') || undefined,
                 client_ip_address: '{{client_ip_address}}',
                 client_user_agent: navigator.userAgent,
                 fbp: getFbp() || undefined,
                 fbc: getFbc() || undefined
             });
 
-            // Track PageView
             fbq('track', 'PageView', {
                 content_name: 'First Customer System - Thank You',
                 content_category: 'Digital Product',
@@ -72,7 +60,6 @@
 
     <!-- Zaraz Tracking Function -->
     <script>
-        // Function to get fbc from cookie (preserve original case)
         function getFbc() {
             const cookies = document.cookie.split(';');
             for (let cookie of cookies) {
@@ -84,7 +71,6 @@
             return null;
         }
 
-        // Function to get fbp from cookie
         function getFbp() {
             const cookies = document.cookie.split(';');
             for (let cookie of cookies) {
@@ -96,32 +82,10 @@
             return null;
         }
 
-        // Enhanced trackConversion function
         function trackConversion(eventName, eventData = {}) {
-            const userData = {
-                email: localStorage.getItem('user_email') || '',
-                phone: localStorage.getItem('user_phone') || '',
-                firstName: localStorage.getItem('user_first_name') || '',
-                lastName: localStorage.getItem('user_last_name') || '',
-                city: localStorage.getItem('user_city') || '',
-                state: localStorage.getItem('user_state') || '',
-                zip: localStorage.getItem('user_zip') || '',
-                country: localStorage.getItem('user_country') || '',
-                userId: localStorage.getItem('user_id') || ''
-            };
-
             const trackingData = {
                 event_name: eventName,
                 user_data: {
-                    em: userData.email || undefined,
-                    ph: userData.phone || undefined,
-                    fn: userData.firstName || undefined,
-                    ln: userData.lastName || undefined,
-                    ct: userData.city || undefined,
-                    st: userData.state || undefined,
-                    zp: userData.zip || undefined,
-                    country: userData.country || undefined,
-                    external_id: userData.userId || undefined,
                     client_ip_address: '{{client_ip_address}}',
                     client_user_agent: navigator.userAgent,
                     fbp: getFbp() || undefined,
@@ -135,24 +99,13 @@
                 event_id: eventName + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
             };
 
-            // Send to Zaraz
             if (typeof zaraz !== 'undefined' && zaraz.track) {
                 zaraz.track(eventName, trackingData);
             }
 
-            // Send via Facebook Pixel
             if (typeof fbq !== 'undefined') {
                 fbq('track', eventName, {
                     ...eventData,
-                    em: userData.email || undefined,
-                    ph: userData.phone || undefined,
-                    fn: userData.firstName || undefined,
-                    ln: userData.lastName || undefined,
-                    ct: userData.city || undefined,
-                    st: userData.state || undefined,
-                    zp: userData.zip || undefined,
-                    country: userData.country || undefined,
-                    external_id: userData.userId || undefined,
                     fbp: getFbp() || undefined,
                     fbc: getFbc() || undefined
                 }, {
@@ -163,121 +116,55 @@
             return trackingData;
         }
 
-        // ============================================
-        // PURCHASE EVENT - FIRES ON PAGE LOAD (ONCE)
-        // ============================================
-        (function firePurchaseEvent() {
-            // Check if purchase event already fired in this session
-            if (sessionStorage.getItem('purchase_event_fired')) {
-                console.log('Purchase event already fired in this session. Skipping.');
-                return;
-            }
-
-            // Get order data from localStorage (set in upsell.html)
-            let orderData = {};
-            try {
-                const storedData = localStorage.getItem('order_data');
-                if (storedData) {
-                    orderData = JSON.parse(storedData);
-                }
-            } catch (e) {
-                console.warn('Could not parse order data:', e);
-            }
-
-            // Get total value - always $17 for the base product
-            // Even if they bought upsells, we only track the base product value
-            const baseValue = 17.00;
-            
-            // Get content IDs - always include the base product
-            const contentIds = ['FCS-001'];
-            
-            // Check if they selected upsells (for tracking purposes only)
-            const hasUpsell1 = orderData.selectedUpsell1 || false;
-            const hasUpsell2 = orderData.selectedUpsell2 || false;
-            
-            // Build contents array with base product only
-            const contents = [
-                { id: 'FCS-001', quantity: 1, item_price: 17.00 }
-            ];
-
-            // If upsells were selected, add them to contents for tracking but keep value at $17
-            if (hasUpsell1) {
-                contents.push({ id: 'FCS-UPS-001', quantity: 1, item_price: 0 }); // $0 because we're not tracking upsell value
-                contentIds.push('FCS-UPS-001');
-            }
-            if (hasUpsell2) {
-                contents.push({ id: 'FCS-UPS-002', quantity: 1, item_price: 0 }); // $0 because we're not tracking upsell value
-                contentIds.push('FCS-UPS-002');
-            }
-
-            // Prepare Purchase event data
-            const purchaseData = {
-                value: baseValue, // Always $17
-                currency: 'USD',
-                content_name: 'First Customer System',
-                content_ids: contentIds,
-                content_type: 'product',
-                num_items: contentIds.length,
-                contents: contents,
-                order_id: 'order_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
-                status: 'completed',
-                payment_method: 'stripe'
-            };
-
-            console.log('🔥 Firing Purchase event with data:', purchaseData);
-
-            // Fire the purchase event
-            trackConversion('Purchase', purchaseData);
-
-            // Mark as fired in session storage
-            sessionStorage.setItem('purchase_event_fired', 'true');
-            
-            // Also store the order ID for reference
-            localStorage.setItem('last_order_id', purchaseData.order_id);
-
-            console.log('✅ Purchase event fired successfully!');
-        })();
-
-        // Function to set user data (call this when user provides info)
-        function setUserData(userData) {
-            Object.keys(userData).forEach(key => {
-                localStorage.setItem('user_' + key, userData[key]);
-            });
-        }
-
-        // Function to get fbclid from URL and store it
         function storeFbclid() {
             const urlParams = new URLSearchParams(window.location.search);
             const fbclid = urlParams.get('fbclid');
             if (fbclid) {
                 document.cookie = '_fbc=' + fbclid + '; path=/; max-age=7776000';
-                localStorage.setItem('fbclid', fbclid);
             }
         }
 
-        // Store fbclid when page loads
         storeFbclid();
 
-        // Expose functions globally
+        // Purchase Event - Fires ONCE on page load
+        (function firePurchaseEvent() {
+            if (sessionStorage.getItem('purchase_event_fired')) {
+                console.log('Purchase event already fired. Skipping.');
+                return;
+            }
+
+            // Always $17 for the base product
+            const purchaseData = {
+                value: 17.00,
+                currency: 'USD',
+                content_name: 'First Customer System',
+                content_ids: ['FCS-001'],
+                content_type: 'product',
+                num_items: 1,
+                order_id: 'order_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+                status: 'completed',
+                payment_method: 'stripe'
+            };
+
+            console.log('🔥 Firing Purchase event:', purchaseData);
+            trackConversion('Purchase', purchaseData);
+            sessionStorage.setItem('purchase_event_fired', 'true');
+            console.log('✅ Purchase event fired successfully!');
+        })();
+
         window.trackConversion = trackConversion;
-        window.setUserData = setUserData;
-        window.storeFbclid = storeFbclid;
     </script>
 
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>$1K Income Machine — Thank You</title>
     
-    <!-- Google Fonts (match existing) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
-    
-    <!-- Font Awesome (match existing) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     
     <style>
-        /* ===== RESET & BASE ===== */
         * {
             margin: 0;
             padding: 0;
@@ -306,7 +193,6 @@
             margin: 0 auto;
         }
 
-        /* ===== COLOR VARIABLES (match existing) ===== */
         :root {
             --primary-green: #00e676;
             --dark-green: #00c853;
@@ -324,7 +210,6 @@
             --shadow-heroic: rgba(0, 200, 83, 0.2);
         }
 
-        /* ===== UTILITY ===== */
         .text-gradient {
             background: linear-gradient(135deg, #69f0ae, #2979ff);
             -webkit-background-clip: text;
@@ -332,7 +217,6 @@
             color: transparent;
         }
 
-        /* ===== CARD (glass-style, matches existing) ===== */
         .card {
             background: linear-gradient(145deg, #0d0d0d, #080808);
             border-radius: 32px;
@@ -360,7 +244,6 @@
             box-shadow: 0 25px 80px rgba(0, 0, 0, 0.95), 0 0 80px rgba(0, 200, 83, 0.08);
         }
 
-        /* ===== BUTTON (matches existing) ===== */
         .btn-primary {
             display: inline-block;
             background: linear-gradient(145deg, #00e676, #00c853);
@@ -414,7 +297,6 @@
             transform: scale(0.98);
         }
 
-        /* ===== SUCCESS HEADER ===== */
         .success-header {
             text-align: center;
             margin-bottom: 40px;
@@ -464,7 +346,6 @@
             color: #69f0ae;
         }
 
-        /* ===== SECTION (with fade-up animation) ===== */
         .section {
             opacity: 0;
             transform: translateY(30px);
@@ -491,7 +372,6 @@
             100% { opacity: 1; transform: scale(1); }
         }
 
-        /* ===== EXCITEMENT SECTION ===== */
         .excitement-section {
             margin-bottom: 30px;
         }
@@ -530,7 +410,6 @@
             border-radius: 8px;
         }
 
-        /* ===== IMPORTANT NOTICE CARD ===== */
         .notice-card {
             margin-bottom: 35px;
         }
@@ -589,7 +468,6 @@
             color: #ffffff;
         }
 
-        /* ===== CTA SECTION ===== */
         .cta-section {
             margin-bottom: 35px;
         }
@@ -599,7 +477,6 @@
             margin: 0 auto;
         }
 
-        /* ===== MOTIVATION SECTION ===== */
         .motivation-section {
             text-align: center;
             margin-bottom: 30px;
@@ -635,7 +512,6 @@
             color: #69f0ae;
         }
 
-        /* ===== FINAL REMINDER ===== */
         .final-reminder {
             text-align: center;
             color: #666666;
@@ -652,59 +528,46 @@
             color: #888888;
         }
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
             body {
                 padding: 20px 16px;
             }
-
             .card {
                 padding: 28px 24px;
                 border-radius: 24px;
             }
-
             .success-header h1 {
                 font-size: 2.2rem;
             }
-
             .success-header .subheading {
                 font-size: 1rem;
             }
-
             .excitement-section h2 {
                 font-size: 1.5rem;
             }
-
             .excitement-section p {
                 font-size: 0.95rem;
             }
-
             .notice-card .card {
                 padding: 24px 20px;
             }
-
             .notice-card .card-header h3 {
                 font-size: 1.2rem;
             }
-
             .notice-card ul li {
                 font-size: 0.9rem;
                 padding: 8px 0 8px 28px;
             }
-
             .btn-primary {
                 font-size: 1rem;
                 padding: 16px 30px;
             }
-
             .motivation-section h2 {
                 font-size: 1.6rem;
             }
-
             .motivation-section p {
                 font-size: 0.95rem;
             }
-
             .final-reminder {
                 font-size: 0.85rem;
             }
@@ -714,21 +577,17 @@
             .success-header .icon {
                 font-size: 3rem;
             }
-
             .success-header h1 {
                 font-size: 1.8rem;
             }
-
             .card {
                 padding: 20px 16px;
                 border-radius: 20px;
             }
-
             .excitement-section .action-call {
                 font-size: 0.95rem;
                 padding: 12px 16px;
             }
-
             .btn-primary {
                 font-size: 0.9rem;
                 padding: 14px 24px;
@@ -739,7 +598,6 @@
 <body>
     <div class="container">
 
-        <!-- ===== SUCCESS HEADER ===== -->
         <header class="success-header">
             <span class="icon"><i class="fas fa-check-circle"></i></span>
             <h1>
@@ -752,7 +610,6 @@
             </p>
         </header>
 
-        <!-- ===== EXCITEMENT SECTION ===== -->
         <section class="section excitement-section">
             <h2>You Didn't Just Buy A Product<span class="highlight">...</span></h2>
             <p>
@@ -772,7 +629,6 @@
             </div>
         </section>
 
-        <!-- ===== IMPORTANT NOTICE CARD ===== -->
         <section class="section notice-card">
             <div class="card">
                 <div class="card-header">
@@ -788,7 +644,6 @@
             </div>
         </section>
 
-        <!-- ===== PRIMARY CTA ===== -->
         <section class="section cta-section">
             <div class="btn-wrapper">
                 <a href="https://mail.google.com" class="btn-primary" target="_blank">
@@ -798,7 +653,6 @@
             </div>
         </section>
 
-        <!-- ===== MOTIVATION SECTION ===== -->
         <section class="section motivation-section">
             <h2>Your <span class="highlight">First Customer</span> Starts Today</h2>
             <p>
@@ -810,7 +664,6 @@
             </p>
         </section>
 
-        <!-- ===== FINAL REMINDER ===== -->
         <div class="section final-reminder">
             <i class="fas fa-envelope"></i>
             Need help?<br />
@@ -819,15 +672,9 @@
 
     </div>
 
-    <!-- ===== JAVASCRIPT (optional smooth interactions) ===== -->
     <script>
-        // ============================================
-        // SMOOTH SCROLL & INTERACTION
-        // ============================================
         document.addEventListener('DOMContentLoaded', function() {
-            // Add a subtle entrance effect to cards on scroll
             const cards = document.querySelectorAll('.card');
-            
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
@@ -835,9 +682,7 @@
                         entry.target.style.opacity = '1';
                     }
                 });
-            }, {
-                threshold: 0.1
-            });
+            }, { threshold: 0.1 });
 
             cards.forEach(card => {
                 card.style.transform = 'translateY(20px)';
@@ -846,28 +691,13 @@
                 observer.observe(card);
             });
 
-            // ============================================
-            // CTA BUTTON - REPLACE WITH YOUR PRODUCT LINK
-            // ============================================
             const ctaBtn = document.querySelector('.btn-primary');
             if (ctaBtn) {
-                // ⚠️ REPLACE THIS URL WITH YOUR ACTUAL PRODUCT LINK
                 ctaBtn.href = 'https://mail.google.com';
-                
-                // Add click tracking (optional)
                 ctaBtn.addEventListener('click', function(e) {
                     console.log('Product access clicked!');
                 });
             }
-
-            // ============================================
-            // KEYBOARD SUPPORT (Enter to click CTA)
-            // ============================================
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter' && document.activeElement === ctaBtn) {
-                    ctaBtn.click();
-                }
-            });
 
             console.log('🎉 Thank You page loaded successfully!');
         });
