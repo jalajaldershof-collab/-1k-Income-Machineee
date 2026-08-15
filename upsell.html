@@ -12,57 +12,67 @@
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
         
-        // Initialize with proper user_data parameters
-        fbq('init', '1690917758676510', {
-            // These will be populated from localStorage if available
-            em: localStorage.getItem('user_email') || undefined,
-            ph: localStorage.getItem('user_phone') || undefined,
-            fn: localStorage.getItem('user_first_name') || undefined,
-            ln: localStorage.getItem('user_last_name') || undefined,
-            ct: localStorage.getItem('user_city') || undefined,
-            st: localStorage.getItem('user_state') || undefined,
-            zp: localStorage.getItem('user_zip') || undefined,
-            country: localStorage.getItem('user_country') || undefined,
-            external_id: localStorage.getItem('user_id') || undefined,
-            client_ip_address: '{{client_ip_address}}',
-            client_user_agent: navigator.userAgent,
-            fbp: document.cookie.split(';').find(c => c.trim().startsWith('_fbp='))?.split('=')[1] || undefined,
-            fbc: document.cookie.split(';').find(c => c.trim().startsWith('_fbc='))?.split('=')[1] || undefined
-        });
+        // Initialize with only what's available
+        (function initPixel() {
+            const getFbc = () => {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    const [name, value] = cookie.trim().split('=');
+                    if (name === '_fbc') {
+                        return value;
+                    }
+                }
+                return null;
+            };
 
-        // Track PageView with all required parameters
-        fbq('track', 'PageView', {
-            content_name: 'First Customer System - Upsell',
-            content_category: 'Digital Product',
-            content_type: 'product',
-            content_ids: ['FCS-UPS-001'],
-            currency: 'USD'
-        }, {
-            eventID: 'pageview_upsell_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
-        });
+            const getFbp = () => {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    const [name, value] = cookie.trim().split('=');
+                    if (name === '_fbp') {
+                        return value;
+                    }
+                }
+                return null;
+            };
+
+            fbq('init', '1690917758676510', {
+                client_ip_address: '{{client_ip_address}}',
+                client_user_agent: navigator.userAgent,
+                fbp: getFbp() || undefined,
+                fbc: getFbc() || undefined
+            });
+
+            fbq('track', 'PageView', {
+                content_name: 'First Customer System - Upsell',
+                content_category: 'Digital Product',
+                content_type: 'product',
+                content_ids: ['FCS-UPS-001']
+            }, {
+                eventID: 'pageview_upsell_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+            });
+        })();
     </script>
     <noscript>
         <img height="1" width="1" style="display:none"
-            src="https://www.facebook.com/tr?id=1690917758676510&ev=PageView&noscript=1&cd%5Bcontent_name%5D=First%20Customer%20System%20-%20Upsell&cd%5Bcontent_category%5D=Digital%20Product&cd%5Bcontent_type%5D=product&cd%5Bcontent_ids%5D=FCS-UPS-001&cd%5Bcurrency%5D=USD"
+            src="https://www.facebook.com/tr?id=1690917758676510&ev=PageView&noscript=1"
         />
     </noscript>
     <!-- End Meta Pixel Code -->
 
-    <!-- Zaraz Tracking Function with proper parameters -->
+    <!-- Zaraz Tracking Function -->
     <script>
-        // Function to get fbc from cookie (preserve original case)
         function getFbc() {
             const cookies = document.cookie.split(';');
             for (let cookie of cookies) {
                 const [name, value] = cookie.trim().split('=');
                 if (name === '_fbc') {
-                    return value; // Return as-is, preserve case
+                    return value;
                 }
             }
             return null;
         }
 
-        // Function to get fbp from cookie
         function getFbp() {
             const cookies = document.cookie.split(';');
             for (let cookie of cookies) {
@@ -74,69 +84,30 @@
             return null;
         }
 
-        // Enhanced trackConversion function
         function trackConversion(eventName, eventData = {}) {
-            // Collect user data from localStorage
-            const userData = {
-                email: localStorage.getItem('user_email') || '',
-                phone: localStorage.getItem('user_phone') || '',
-                firstName: localStorage.getItem('user_first_name') || '',
-                lastName: localStorage.getItem('user_last_name') || '',
-                city: localStorage.getItem('user_city') || '',
-                state: localStorage.getItem('user_state') || '',
-                zip: localStorage.getItem('user_zip') || '',
-                country: localStorage.getItem('user_country') || '',
-                userId: localStorage.getItem('user_id') || ''
-            };
-
-            // Prepare the event data with all required parameters
             const trackingData = {
                 event_name: eventName,
                 user_data: {
-                    em: userData.email || undefined,
-                    ph: userData.phone || undefined,
-                    fn: userData.firstName || undefined,
-                    ln: userData.lastName || undefined,
-                    ct: userData.city || undefined,
-                    st: userData.state || undefined,
-                    zp: userData.zip || undefined,
-                    country: userData.country || undefined,
-                    external_id: userData.userId || undefined,
                     client_ip_address: '{{client_ip_address}}',
                     client_user_agent: navigator.userAgent,
                     fbp: getFbp() || undefined,
-                    fbc: getFbc() || undefined // Preserve original case
+                    fbc: getFbc() || undefined
                 },
                 custom_data: {
                     ...eventData,
                     event_source_url: window.location.href,
-                    page_title: document.title,
-                    content_ids: eventData.content_ids || ['FCS-UPS-001'],
-                    content_name: eventData.content_name || 'First Customer System - Upsell',
-                    content_type: eventData.content_type || 'product'
+                    page_title: document.title
                 },
                 event_id: eventName + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
             };
 
-            // Send via Zaraz if available
             if (typeof zaraz !== 'undefined' && zaraz.track) {
                 zaraz.track(eventName, trackingData);
             }
 
-            // Also send via Facebook Pixel for redundancy
             if (typeof fbq !== 'undefined') {
                 fbq('track', eventName, {
                     ...eventData,
-                    // Include user data as custom parameters
-                    em: userData.email || undefined,
-                    ph: userData.phone || undefined,
-                    fn: userData.firstName || undefined,
-                    ln: userData.lastName || undefined,
-                    ct: userData.city || undefined,
-                    st: userData.state || undefined,
-                    zp: userData.zip || undefined,
-                    country: userData.country || undefined,
-                    external_id: userData.userId || undefined,
                     fbp: getFbp() || undefined,
                     fbc: getFbc() || undefined
                 }, {
@@ -147,44 +118,17 @@
             return trackingData;
         }
 
-        // Function to set user data (call this when user provides info)
-        function setUserData(userData) {
-            Object.keys(userData).forEach(key => {
-                localStorage.setItem('user_' + key, userData[key]);
-            });
-            // Re-initialize Facebook Pixel with new user data
-            fbq('init', '1690917758676510', {
-                em: userData.email || undefined,
-                ph: userData.phone || undefined,
-                fn: userData.firstName || undefined,
-                ln: userData.lastName || undefined,
-                ct: userData.city || undefined,
-                st: userData.state || undefined,
-                zp: userData.zip || undefined,
-                country: userData.country || undefined,
-                external_id: userData.userId || undefined,
-                fbp: getFbp() || undefined,
-                fbc: getFbc() || undefined
-            });
-        }
-
-        // Function to get fbclid from URL and store it
         function storeFbclid() {
             const urlParams = new URLSearchParams(window.location.search);
             const fbclid = urlParams.get('fbclid');
             if (fbclid) {
-                // Store the exact value without modification
-                document.cookie = '_fbc=' + fbclid + '; path=/; max-age=7776000'; // 90 days
-                localStorage.setItem('fbclid', fbclid);
+                document.cookie = '_fbc=' + fbclid + '; path=/; max-age=7776000';
             }
         }
 
-        // Store fbclid when page loads
         storeFbclid();
 
-        // Function to track InitiateCheckout with proper parameters
         function initiateUpsellCheckout() {
-            // Calculate total based on selected upsells
             let total = 17;
             const selectedUpsell1 = document.querySelector('#checkbox1')?.classList.contains('selected') || false;
             const selectedUpsell2 = document.querySelector('#checkbox2')?.classList.contains('selected') || false;
@@ -192,49 +136,20 @@
             if (selectedUpsell1) total += 10;
             if (selectedUpsell2) total += 27;
 
-            // Get content IDs based on selection
             let contentIds = ['FCS-001'];
             if (selectedUpsell1) contentIds.push('FCS-UPS-001');
             if (selectedUpsell2) contentIds.push('FCS-UPS-002');
 
-            const eventData = {
+            trackConversion('InitiateCheckout', {
                 content_name: 'First Customer System Bundle',
                 content_type: 'product',
                 currency: 'USD',
                 value: total,
                 content_ids: contentIds,
-                contents: [
-                    { id: 'FCS-001', quantity: 1, item_price: 17 },
-                    ...(selectedUpsell1 ? [{ id: 'FCS-UPS-001', quantity: 1, item_price: 10 }] : []),
-                    ...(selectedUpsell2 ? [{ id: 'FCS-UPS-002', quantity: 1, item_price: 27 }] : [])
-                ],
-                num_items: contentIds.length,
-                payment_method: 'stripe',
-                shipping_method: 'digital'
-            };
+                num_items: contentIds.length
+            });
 
-            // Track the event
-            trackConversion('InitiateCheckout', eventData);
-
-            // Also track the specific upsell selections as custom events if needed
-            if (selectedUpsell1) {
-                trackConversion('Upsell1Selected', {
-                    content_name: 'Whop Sellers Launchpad',
-                    content_type: 'product',
-                    value: 10,
-                    currency: 'USD'
-                });
-            }
-            if (selectedUpsell2) {
-                trackConversion('Upsell2Selected', {
-                    content_name: 'Free Client Formula',
-                    content_type: 'product',
-                    value: 27,
-                    currency: 'USD'
-                });
-            }
-
-            // Store the order data for the thank you page
+            // Store selection for thankyou page
             localStorage.setItem('order_data', JSON.stringify({
                 total: total,
                 items: contentIds,
@@ -243,11 +158,8 @@
             }));
         }
 
-        // Expose functions globally
         window.trackConversion = trackConversion;
-        window.setUserData = setUserData;
         window.initiateUpsellCheckout = initiateUpsellCheckout;
-        window.storeFbclid = storeFbclid;
     </script>
 
     <meta charset="UTF-8">
@@ -259,6 +171,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        /* ALL YOUR EXISTING CSS HERE - UNCHANGED */
         * {
             margin: 0;
             padding: 0;
@@ -283,7 +196,6 @@
             padding: 0 24px;
         }
 
-        /* ----- Color Scheme (Heroic & Premium) ----- */
         :root {
             --primary-green: #00e676;
             --dark-green: #00c853;
@@ -303,7 +215,6 @@
             --shadow-epic: rgba(0, 200, 83, 0.08);
         }
 
-        /* ----- Buttons (Heroic) ----- */
         .btn-primary {
             display: inline-block;
             background: linear-gradient(145deg, #00e676, #00c853);
@@ -395,7 +306,6 @@
             margin: 0 auto 2rem auto;
         }
 
-        /* ----- Navigation (Heroic) ----- */
         .navbar {
             padding: 20px 0;
             border-bottom: 1px solid rgba(42, 42, 42, 0.5);
@@ -427,46 +337,6 @@
             text-shadow: 0 0 40px rgba(0, 200, 83, 0.3);
         }
 
-        .nav-links {
-            display: flex;
-            gap: 32px;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: #bbbbbb;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-            font-size: 1rem;
-            letter-spacing: 0.3px;
-        }
-
-        .nav-links a:hover {
-            color: #69f0ae;
-        }
-
-        .nav-links .btn-small {
-            background: linear-gradient(145deg, #00e676, #00c853);
-            color: #000;
-            padding: 10px 24px;
-            border-radius: 40px;
-            font-weight: 800;
-            box-shadow: 0 0 40px rgba(0, 200, 83, 0.3);
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-size: 0.85rem;
-        }
-
-        .nav-links .btn-small:hover {
-            background: linear-gradient(145deg, #69f0ae, #00c853);
-            color: #000;
-            box-shadow: 0 0 60px rgba(0, 200, 83, 0.5);
-            transform: scale(1.05);
-        }
-
-        /* ----- Upsell Header (Heroic) ----- */
         .upsell-header {
             text-align: center;
             padding: 50px 0 30px 0;
@@ -541,7 +411,6 @@
             color: #69f0ae;
         }
 
-        /* ----- Main Product (Heroic) ----- */
         .main-product {
             margin: 40px 0 50px 0;
         }
@@ -606,21 +475,6 @@
             object-fit: cover;
             position: relative;
             z-index: 0;
-        }
-
-        .main-product .product-image .placeholder {
-            color: #444;
-            font-size: 1rem;
-            text-align: center;
-            z-index: 1;
-            position: absolute;
-        }
-
-        .main-product .product-image .placeholder i {
-            font-size: 4rem;
-            color: #333;
-            display: block;
-            margin-bottom: 12px;
         }
 
         .main-product .product-info {
@@ -720,7 +574,6 @@
             margin-top: 8px;
         }
 
-        /* ----- Upsell Grid (Heroic) ----- */
         .upsell-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -785,21 +638,6 @@
             object-fit: cover;
             position: relative;
             z-index: 0;
-        }
-
-        .upsell-tile .tile-image .placeholder {
-            color: #444;
-            font-size: 0.9rem;
-            text-align: center;
-            z-index: 1;
-            position: absolute;
-        }
-
-        .upsell-tile .tile-image .placeholder i {
-            font-size: 3rem;
-            color: #333;
-            display: block;
-            margin-bottom: 8px;
         }
 
         .upsell-tile .tile-badge {
@@ -877,7 +715,6 @@
             color: #69f0ae;
         }
 
-        /* ----- Selection Checkbox (Heroic) ----- */
         .selection-checkbox {
             position: absolute;
             top: 18px;
@@ -918,7 +755,6 @@
             transition: color 0.3s ease;
         }
 
-        /* ----- Price Summary (Heroic) ----- */
         .price-summary {
             background: linear-gradient(145deg, #0a0a0a, #050505);
             border-radius: 32px;
@@ -988,236 +824,10 @@
             min-width: 220px;
         }
 
-        /* ----- Bottom Section (Heroic) ----- */
         .bottom-section {
             margin: 35px 0 45px 0;
         }
 
-        .bottom-section .image-tile {
-            background: linear-gradient(145deg, #0d0d0d, #080808);
-            border-radius: 32px;
-            padding: 35px;
-            border: 1px solid rgba(42, 42, 42, 0.5);
-            box-shadow: 0 15px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 200, 83, 0.03);
-            text-align: center;
-            transition: all 0.5s ease;
-        }
-
-        .bottom-section .image-tile:hover {
-            border-color: rgba(0, 200, 83, 0.2);
-            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(0, 200, 83, 0.06);
-            transform: translateY(-4px);
-        }
-
-        .bottom-section .image-tile .bottom-image {
-            width: 100%;
-            height: 220px;
-            border-radius: 20px;
-            background: #111111;
-            border: 1px solid #2a2a2a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            margin-bottom: 18px;
-            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5), 0 8px 30px rgba(0, 0, 0, 0.3);
-            position: relative;
-        }
-
-        .bottom-section .image-tile .bottom-image::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.2) 100%);
-            pointer-events: none;
-        }
-
-        .bottom-section .image-tile .bottom-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            position: relative;
-            z-index: 0;
-        }
-
-        .bottom-section .image-tile .bottom-image .placeholder {
-            color: #444;
-            font-size: 0.9rem;
-            text-align: center;
-            z-index: 1;
-            position: absolute;
-        }
-
-        .bottom-section .image-tile .bottom-image .placeholder i {
-            font-size: 3rem;
-            color: #333;
-            display: block;
-            margin-bottom: 8px;
-        }
-
-        .bottom-section .image-tile .caption {
-            color: #999999;
-            font-size: 1rem;
-            line-height: 1.7;
-        }
-
-        .bottom-section .image-tile .caption strong {
-            color: #69f0ae;
-        }
-
-        /* ----- Footer ----- */
-        footer {
-            padding: 40px 0 24px 0;
-            border-top: 1px solid rgba(26, 26, 26, 0.5);
-            margin-top: 30px;
-            text-align: center;
-            color: #444;
-            font-size: 0.9rem;
-        }
-
-        footer .footer-links {
-            display: flex;
-            justify-content: center;
-            gap: 28px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-
-        footer .footer-links a {
-            color: #555;
-            text-decoration: none;
-            transition: color 0.3s;
-            font-size: 0.85rem;
-        }
-
-        footer .footer-links a:hover {
-            color: #69f0ae;
-        }
-
-        footer .footer-heart {
-            color: #00e676;
-            text-shadow: 0 0 30px rgba(0, 200, 83, 0.3);
-        }
-
-        /* ----- Responsive ----- */
-        @media (max-width: 768px) {
-            .main-product .product-tile {
-                flex-direction: column;
-                padding: 28px;
-            }
-
-            .main-product .product-image {
-                height: 200px;
-                width: 100%;
-            }
-
-            .upsell-grid {
-                grid-template-columns: 1fr;
-                gap: 25px;
-            }
-
-            .price-summary {
-                flex-direction: column;
-                text-align: center;
-                padding: 28px;
-            }
-
-            .upsell-header h1 {
-                font-size: 2.4rem;
-            }
-
-            .section-title {
-                font-size: 2rem;
-            }
-
-            .nav-links {
-                gap: 16px;
-                flex-wrap: wrap;
-                justify-content: center;
-                margin-top: 12px;
-            }
-
-            .main-product .product-info .selection-indicator {
-                display: inline-block;
-                margin-top: 12px;
-            }
-
-            .upsell-tile .tile-image {
-                height: 160px;
-            }
-
-            .bottom-section .image-tile .bottom-image {
-                height: 160px;
-            }
-
-            .price-summary .total-price {
-                font-size: 2.6rem;
-            }
-
-            .upsell-header .badge {
-                font-size: 0.8rem;
-                padding: 6px 16px;
-            }
-
-            .upsell-header .sub-headline {
-                font-size: 1.1rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .main-product .product-image {
-                height: 160px;
-            }
-
-            .upsell-tile .tile-image {
-                height: 140px;
-            }
-
-            .bottom-section .image-tile .bottom-image {
-                height: 140px;
-            }
-
-            .price-summary .total-price {
-                font-size: 2.2rem;
-            }
-
-            .upsell-header h1 {
-                font-size: 2rem;
-            }
-
-            .main-product .product-tile {
-                padding: 20px;
-            }
-        }
-
-        /* ===== BOTTOM SECTION - IMAGE + STORY PAIRS ===== */
-        .bottom-section {
-            margin: 35px 0 45px 0;
-        }
-
-        .section-headline {
-            margin-bottom: 40px;
-        }
-
-        .section-headline .section-title {
-            font-size: 2rem;
-            font-weight: 900;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #ffffff 0%, #69f0ae 50%, #82b1ff 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 0 60px rgba(0, 200, 83, 0.15);
-        }
-
-        .section-headline .section-sub {
-            color: #aaaaaa;
-            font-size: 1.1rem;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        /* Image + Story Pair */
         .image-story-pair {
             margin-bottom: 10px;
         }
@@ -1271,21 +881,6 @@
             z-index: 0;
         }
 
-        .bottom-image .placeholder {
-            color: #444;
-            font-size: 0.9rem;
-            text-align: center;
-            z-index: 1;
-            position: absolute;
-        }
-
-        .bottom-image .placeholder i {
-            font-size: 3rem;
-            color: #333;
-            display: block;
-            margin-bottom: 8px;
-        }
-
         .story-content {
             flex: 2;
             min-width: 200px;
@@ -1328,77 +923,140 @@
             color: #ffffff;
         }
 
-        /* Divider between pairs */
         .story-divider {
             height: 1px;
             background: linear-gradient(90deg, transparent, rgba(0, 200, 83, 0.15), transparent);
             margin: 30px 0;
         }
 
-        /* ===== RESPONSIVE ===== */
+        footer {
+            padding: 40px 0 24px 0;
+            border-top: 1px solid rgba(26, 26, 26, 0.5);
+            margin-top: 30px;
+            text-align: center;
+            color: #444;
+            font-size: 0.9rem;
+        }
+
+        footer .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 28px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        footer .footer-links a {
+            color: #555;
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: 0.85rem;
+        }
+
+        footer .footer-links a:hover {
+            color: #69f0ae;
+        }
+
+        footer .footer-heart {
+            color: #00e676;
+            text-shadow: 0 0 30px rgba(0, 200, 83, 0.3);
+        }
+
+        .section-headline {
+            margin-bottom: 40px;
+        }
+
+        .section-headline .section-title {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff 0%, #69f0ae 50%, #82b1ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 60px rgba(0, 200, 83, 0.15);
+        }
+
+        .section-headline .section-sub {
+            color: #aaaaaa;
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
         @media (max-width: 768px) {
+            .main-product .product-tile {
+                flex-direction: column;
+                padding: 28px;
+            }
+            .main-product .product-image {
+                height: 200px;
+                width: 100%;
+            }
+            .upsell-grid {
+                grid-template-columns: 1fr;
+                gap: 25px;
+            }
+            .price-summary {
+                flex-direction: column;
+                text-align: center;
+                padding: 28px;
+            }
+            .upsell-header h1 {
+                font-size: 2.4rem;
+            }
+            .section-title {
+                font-size: 2rem;
+            }
+            .upsell-tile .tile-image {
+                height: 160px;
+            }
+            .bottom-image {
+                height: 160px;
+            }
             .image-tile {
                 flex-direction: column;
                 padding: 24px;
             }
-
             .bottom-image {
                 width: 100%;
                 height: 180px;
                 min-width: unset;
             }
-
             .story-content {
                 width: 100%;
                 min-width: unset;
             }
-
-            .story-title {
-                font-size: 1.1rem;
-            }
-
-            .story-text {
-                font-size: 0.95rem;
-            }
-
-            .section-headline .section-title {
-                font-size: 1.6rem;
-            }
-
-            .section-headline .section-sub {
-                font-size: 1rem;
-            }
-
-            .story-divider {
-                margin: 20px 0;
-            }
         }
 
         @media (max-width: 480px) {
+            .main-product .product-image {
+                height: 160px;
+            }
+            .upsell-tile .tile-image {
+                height: 140px;
+            }
+            .bottom-image {
+                height: 150px;
+            }
+            .price-summary .total-price {
+                font-size: 2.2rem;
+            }
+            .upsell-header h1 {
+                font-size: 2rem;
+            }
+            .main-product .product-tile {
+                padding: 20px;
+            }
             .image-tile {
                 padding: 18px;
                 border-radius: 24px;
             }
-
-            .bottom-image {
-                height: 150px;
-            }
-
             .story-title {
                 font-size: 1rem;
             }
-
             .story-text {
                 font-size: 0.9rem;
-            }
-
-            .story-author {
-                font-size: 0.8rem;
-                flex-wrap: wrap;
-            }
-
-            .section-headline .section-title {
-                font-size: 1.3rem;
             }
         }
     </style>
@@ -1411,14 +1069,14 @@
         </div>
     </nav>
 
-    <!-- Upsell Header (Heroic) -->
+    <!-- Upsell Header -->
     <section class="upsell-header container">
         <div class="badge"><i class="fas fa-bolt"></i> Limited Time — Save Up to $230</div>
         <h1>Complete Your <span class="highlight">First Customer</span> System</h1>
         <p class="sub-headline">Select the upgrades that will <strong>supercharge your results</strong>. The more you add, the more you save — and the faster you win.</p>
     </section>
 
-    <!-- Main Product (Big Tile) -->
+    <!-- Main Product -->
     <section class="main-product container">
         <div class="product-tile" id="mainProduct">
             <div class="product-image">
@@ -1443,7 +1101,7 @@
         </div>
     </section>
 
-    <!-- Upsell Grid (2 tiles) -->
+    <!-- Upsell Grid -->
     <section class="container">
         <h2 class="section-title" style="text-align: center; font-size: 2.2rem;">⚡ Choose Your Power-Ups</h2>
         <p class="section-sub" style="text-align: center; margin-bottom: 0;">These are the upgrades that turn a good system into a <strong style="color: #69f0ae;">money-printing machine</strong>. The system works exponentially better when you have the complete arsenal. Don't leave money on the table.</p>
@@ -1495,7 +1153,7 @@
         </div>
     </section>
 
-    <!-- Price Summary / Total (Heroic) -->
+    <!-- Price Summary -->
     <section class="container">
         <div class="price-summary">
             <div>
@@ -1515,9 +1173,8 @@
         </div>
     </section>
 
-    <!-- ===== BOTTOM SECTION (Updated with Image + Story pairs) ===== -->
+    <!-- Bottom Section -->
     <section class="bottom-section container">
-        <!-- Headline at the top -->
         <div class="section-headline">
             <h2 class="section-title" style="text-align: center; font-size: 2rem; margin-bottom: 8px;">
                 The <span style="color: #69f0ae;">"Unfair Advantage"</span> Bundle
@@ -1527,16 +1184,10 @@
             </p>
         </div>
 
-        <!-- Image + Story Pair 1 -->
         <div class="image-story-pair">
             <div class="image-tile">
                 <div class="bottom-image">
                     <img src="Assets/review3.jpg" alt="Success Story 1" style="width: 100%; height: 100%; object-fit: contain; object-position: center; position: relative; z-index: 0;">
-                    <!-- Fallback placeholder if image not found -->
-                    <div class="placeholder" style="display: none;">
-                        <i class="fas fa-image"></i>
-                        <span>Image 1</span>
-                    </div>
                 </div>
                 <div class="story-content">
                     <h3 class="story-title">From Zero to €8,700 in 7 Days</h3>
@@ -1544,26 +1195,18 @@
                         "Jakub started the week with nothing but the same 3-product stack you're looking at right now. Seven days later — €8,251 in gross volume, a 213% jump from the week before. No agency, no ad team, no guesswork."
                     </p>
                     <div class="story-author">
-                        <i style="color: #69f0ae;"></i>
                         <span><strong>—Jakub Englart</strong></span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Divider between pairs -->
         <div class="story-divider"></div>
 
-        <!-- Image + Story Pair 2 -->
         <div class="image-story-pair">
             <div class="image-tile">
                 <div class="bottom-image">
                     <img src="Assets/mainreview.jpg" alt="Success Story 2" style="width: 100%; height: 100%; object-fit: contain; object-position: center; position: relative; z-index: 0;">
-                    <!-- Fallback placeholder if image not found -->
-                    <div class="placeholder" style="display: none;">
-                        <i class="fas fa-image"></i>
-                        <span>Image 2</span>
-                    </div>
                 </div>
                 <div class="story-content">
                     <h3 class="story-title">$10K in His First Month — 12 Days Early</h3>
@@ -1571,7 +1214,6 @@
                         "Thomas set out to hit $10K in month one. He got there with 12 days to spare. His words: "Once you know what your market wants and how to deliver, it's so easy to make money."
                     </p>
                     <div class="story-author">
-                        <i style="color: #69f0ae;"></i>
                         <span><strong>—Thomas</strong></span>
                     </div>
                 </div>
@@ -1588,9 +1230,7 @@
         </div>
     </footer>
 
-    <!-- JavaScript for Upsell Selection & Dynamic Pricing -->
     <script>
-        // Prices
         const basePrice = 17;
         const upsell1Price = 10;
         const upsell2Price = 27;
@@ -1598,14 +1238,10 @@
         let selectedUpsell1 = false;
         let selectedUpsell2 = false;
 
-        // ============================================
-        // CHECKOUT FUNCTION WITH EVENT TRACKING
-        // ============================================
         function handleCheckout() {
-            // Track InitiateCheckout with all parameters
+            // Track InitiateCheckout
             initiateUpsellCheckout();
             
-            // Calculate total based on selected upsells
             let total = basePrice;
             const hasUpsell1 = selectedUpsell1;
             const hasUpsell2 = selectedUpsell2;
@@ -1613,9 +1249,7 @@
             if (hasUpsell1) total += upsell1Price;
             if (hasUpsell2) total += upsell2Price;
 
-            // Redirect based on selection
             let redirectUrl = '';
-            
             if (hasUpsell1 && hasUpsell2) {
                 redirectUrl = 'https://whop.com/c/ultraoffer/3';
             } else if (hasUpsell1 && !hasUpsell2) {
@@ -1626,22 +1260,16 @@
                 redirectUrl = 'https://whop.com/c/first-customer-blueprint/1';
             }
 
-            // Show loading state on button
             const btn = document.querySelector('.btn-primary');
             const originalText = btn.innerHTML;
             btn.innerHTML = '⏳ Redirecting...';
             btn.style.opacity = '0.7';
             btn.disabled = true;
 
-            // Redirect
             window.location.href = redirectUrl;
         }
 
-        // ============================================
-        // TOGGLE UPSELL FUNCTION
-        // ============================================
         function toggleUpsell(tileId, checkboxId) {
-            // Toggle the selection state
             if (tileId === 'upsell1') {
                 selectedUpsell1 = !selectedUpsell1;
                 const checkbox = document.getElementById(checkboxId);
@@ -1658,7 +1286,6 @@
             updateTotal();
         }
 
-        // Update total price with animation
         function updateTotal() {
             let total = basePrice;
             let savings = 0;
@@ -1692,25 +1319,18 @@
             if (savingsDisplay) {
                 if (totalSavings > 0) {
                     savingsDisplay.innerHTML = `<i class="fas fa-tag" style="margin-right: 6px;"></i> You save $${totalSavings}`;
-                    savingsDisplay.style.display = 'inline-block';
                 } else {
                     savingsDisplay.innerHTML = `<i class="fas fa-tag" style="margin-right: 6px;"></i> You save $0`;
                 }
             }
         }
 
-        // ============================================
-        // EVENT LISTENERS
-        // ============================================
         document.addEventListener('DOMContentLoaded', function() {
-            // Make the entire tile clickable (but NOT the checkbox inside it)
             document.querySelectorAll('.upsell-tile').forEach(function(tile) {
                 tile.addEventListener('click', function(e) {
-                    // If the click was on the checkbox or its children, ignore it
                     if (e.target.closest('.selection-checkbox')) {
                         return;
                     }
-                    
                     const id = this.id;
                     if (id === 'upsell1') {
                         toggleUpsell('upsell1', 'checkbox1');
@@ -1720,11 +1340,9 @@
                 });
             });
 
-            // Make checkboxes clickable
             document.querySelectorAll('.selection-checkbox').forEach(function(checkbox) {
                 checkbox.addEventListener('click', function(e) {
                     e.stopPropagation();
-                    
                     const tile = this.closest('.upsell-tile');
                     if (tile) {
                         const id = tile.id;
@@ -1737,28 +1355,15 @@
                 });
             });
 
-            // Initial price update
             updateTotal();
         });
 
-        // Add CSS animation for savings pulse
         const style = document.createElement('style');
         style.textContent = `
-            @keyframes pulse {
-                0% { transform: scale(1); }
-                50% { transform: scale(1.05); }
-                100% { transform: scale(1); }
-            }
-            .selection-checkbox {
-                cursor: pointer !important;
-            }
-            .upsell-tile {
-                cursor: pointer !important;
-            }
+            .selection-checkbox { cursor: pointer !important; }
+            .upsell-tile { cursor: pointer !important; }
         `;
         document.head.appendChild(style);
-
-        console.log('Upsell page loaded! Click a tile or checkbox to select.');
     </script>
 </body>
 </html>
