@@ -12,71 +12,19 @@
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
         
-        // Initialize with proper configuration
-        fbq('init', '1690917758676510', {
-            // These are the required user_data parameters
-            em: '{{user_email}}', // Will be replaced with actual email if available
-            ph: '{{user_phone}}', // Will be replaced with actual phone if available
-            fn: '{{user_first_name}}',
-            ln: '{{user_last_name}}',
-            ct: '{{user_city}}',
-            st: '{{user_state}}',
-            zp: '{{user_zip}}',
-            country: '{{user_country}}',
-            external_id: '{{user_id}}',
-            client_ip_address: '{{client_ip_address}}',
-            client_user_agent: '{{client_user_agent}}',
-            fbp: '{{fbp}}',
-            fbc: '{{fbc}}'
-        });
-
-        // Track PageView with required parameters
-        fbq('track', 'PageView', {
-            // Event parameters
-            content_name: 'First Customer System',
-            content_category: 'Digital Product',
-            content_type: 'product'
-        }, {
-            // Event ID for deduplication
-            eventID: 'pageview_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
-        });
-    </script>
-    <noscript>
-        <img height="1" width="1" style="display:none"
-            src="https://www.facebook.com/tr?id=1690917758676510&ev=PageView&noscript=1&cd%5Bcontent_name%5D=First%20Customer%20System&cd%5Bcontent_category%5D=Digital%20Product&cd%5Bcontent_type%5D=product"
-        />
-    </noscript>
-    <!-- End Meta Pixel Code -->
-
-    <!-- Zaraz Tracking Function with proper parameters -->
-    <script>
-        function trackConversion(eventName, eventData = {}) {
-            // Collect user data from localStorage or cookies if available
-            const userData = {
-                email: localStorage.getItem('user_email') || '',
-                phone: localStorage.getItem('user_phone') || '',
-                firstName: localStorage.getItem('user_first_name') || '',
-                lastName: localStorage.getItem('user_last_name') || '',
-                city: localStorage.getItem('user_city') || '',
-                state: localStorage.getItem('user_state') || '',
-                zip: localStorage.getItem('user_zip') || '',
-                country: localStorage.getItem('user_country') || '',
-                userId: localStorage.getItem('user_id') || ''
-            };
-
-            // Get fbc from cookie if available (maintain original case)
+        // Initialize with proper configuration - using client-side data
+        (function initPixel() {
             const getFbc = () => {
                 const cookies = document.cookie.split(';');
                 for (let cookie of cookies) {
                     const [name, value] = cookie.trim().split('=');
                     if (name === '_fbc') {
-                        return value; // Return as-is, preserve case
+                        return value;
                     }
                 }
                 return null;
             };
 
-            // Get fbp from cookie if available
             const getFbp = () => {
                 const cookies = document.cookie.split(';');
                 for (let cookie of cookies) {
@@ -88,10 +36,82 @@
                 return null;
             };
 
-            // Prepare the event data with all required parameters
+            fbq('init', '1690917758676510', {
+                em: localStorage.getItem('user_email') || undefined,
+                ph: localStorage.getItem('user_phone') || undefined,
+                fn: localStorage.getItem('user_first_name') || undefined,
+                ln: localStorage.getItem('user_last_name') || undefined,
+                ct: localStorage.getItem('user_city') || undefined,
+                st: localStorage.getItem('user_state') || undefined,
+                zp: localStorage.getItem('user_zip') || undefined,  // ← FIXED: uses localStorage
+                country: localStorage.getItem('user_country') || undefined,
+                external_id: localStorage.getItem('user_id') || undefined,
+                client_ip_address: '{{client_ip_address}}', // This will be replaced by Zaraz
+                client_user_agent: navigator.userAgent,
+                fbp: getFbp() || undefined,
+                fbc: getFbc() || undefined
+            });
+
+            // Track PageView
+            fbq('track', 'PageView', {
+                content_name: 'First Customer System',
+                content_category: 'Digital Product',
+                content_type: 'product'
+            }, {
+                eventID: 'pageview_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+            });
+        })();
+    </script>
+    <noscript>
+        <img height="1" width="1" style="display:none"
+            src="https://www.facebook.com/tr?id=1690917758676510&ev=PageView&noscript=1"
+        />
+    </noscript>
+    <!-- End Meta Pixel Code -->
+
+    <!-- Zaraz Tracking Function -->
+    <script>
+        // Function to get fbc from cookie (preserve original case)
+        function getFbc() {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === '_fbc') {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+        // Function to get fbp from cookie
+        function getFbp() {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === '_fbp') {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+        // Enhanced trackConversion function
+        function trackConversion(eventName, eventData = {}) {
+            // Collect user data from localStorage
+            const userData = {
+                email: localStorage.getItem('user_email') || '',
+                phone: localStorage.getItem('user_phone') || '',
+                firstName: localStorage.getItem('user_first_name') || '',
+                lastName: localStorage.getItem('user_last_name') || '',
+                city: localStorage.getItem('user_city') || '',
+                state: localStorage.getItem('user_state') || '',
+                zip: localStorage.getItem('user_zip') || '',  // ← FIXED: uses localStorage
+                country: localStorage.getItem('user_country') || '',
+                userId: localStorage.getItem('user_id') || ''
+            };
+
             const trackingData = {
                 event_name: eventName,
-                // Include all user_data parameters
                 user_data: {
                     em: userData.email || undefined,
                     ph: userData.phone || undefined,
@@ -99,21 +119,19 @@
                     ln: userData.lastName || undefined,
                     ct: userData.city || undefined,
                     st: userData.state || undefined,
-                    zp: userData.zip || undefined,
+                    zp: userData.zip || undefined,  // ← FIXED: uses localStorage
                     country: userData.country || undefined,
                     external_id: userData.userId || undefined,
                     client_ip_address: '{{client_ip_address}}',
                     client_user_agent: navigator.userAgent,
                     fbp: getFbp() || undefined,
-                    fbc: getFbc() || undefined // Preserve original case
+                    fbc: getFbc() || undefined
                 },
-                // Custom data specific to the event
                 custom_data: {
                     ...eventData,
                     event_source_url: window.location.href,
                     page_title: document.title
                 },
-                // Event ID for deduplication
                 event_id: eventName + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
             };
 
@@ -122,25 +140,22 @@
                 zaraz.track(eventName, trackingData);
             }
 
-            // Also send via Facebook Pixel directly for redundancy
+            // Send via Facebook Pixel
             if (typeof fbq !== 'undefined') {
-                const fbqData = {
+                fbq('track', eventName, {
                     ...eventData,
-                    // Include user data as custom parameters for better matching
                     em: userData.email || undefined,
                     ph: userData.phone || undefined,
                     fn: userData.firstName || undefined,
                     ln: userData.lastName || undefined,
                     ct: userData.city || undefined,
                     st: userData.state || undefined,
-                    zp: userData.zip || undefined,
+                    zp: userData.zip || undefined,  // ← FIXED: uses localStorage
                     country: userData.country || undefined,
                     external_id: userData.userId || undefined,
                     fbp: getFbp() || undefined,
-                    fbc: getFbc() || undefined // Preserve original case
-                };
-                
-                fbq('track', eventName, fbqData, {
+                    fbc: getFbc() || undefined
+                }, {
                     eventID: trackingData.event_id
                 });
             }
@@ -148,7 +163,7 @@
             return trackingData;
         }
 
-        // Function to set user data when available (call this after user provides info)
+        // Function to set user data when available
         function setUserData(userData) {
             Object.keys(userData).forEach(key => {
                 localStorage.setItem('user_' + key, userData[key]);
@@ -160,9 +175,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const fbclid = urlParams.get('fbclid');
             if (fbclid) {
-                // Store the exact value without modification
-                document.cookie = '_fbc=' + fbclid + '; path=/; max-age=7776000'; // 90 days
-                // Also store in localStorage
+                document.cookie = '_fbc=' + fbclid + '; path=/; max-age=7776000';
                 localStorage.setItem('fbclid', fbclid);
             }
         }
@@ -170,7 +183,7 @@
         // Store fbclid when page loads
         storeFbclid();
 
-        // Function to track SubscribedButtonClickt with proper parameters
+        // Function to track Subscribe button click
         function trackSubscribeClick() {
             const eventData = {
                 content_name: 'First Customer System',
@@ -178,22 +191,20 @@
                 value: 17,
                 currency: 'USD',
                 content_ids: ['FCS-001'],
-                // Add any additional custom parameters
                 button_location: 'header',
                 product_name: 'First Customer System'
             };
-            
-            // Track the event
             trackConversion('SubscribedButtonClickt', eventData);
         }
 
-        // Override the global trackConversion function to use the enhanced one
+        // Expose functions globally
         window.trackConversion = trackConversion;
         window.setUserData = setUserData;
         window.trackSubscribeClick = trackSubscribeClick;
+        window.storeFbclid = storeFbclid;
     </script>
 
-    <!-- Rest of the head remains the same -->
+    <!-- Rest of your HTML remains the same -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>$1K Income Machine — First Customer System</title>
@@ -203,7 +214,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* All existing styles remain unchanged */
+        /* ALL YOUR EXISTING CSS STYLES HERE - unchanged */
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family:'Inter',sans-serif; background:#000; color:#e0e0e0; line-height:1.6; overflow-x:hidden; }
         .container { max-width:1200px; margin:0 auto; padding:0 24px; }
@@ -701,7 +712,6 @@
     <footer>
         <div class="container">
             <div class="footer-links">
-                <!-- Footer links can be added here -->
             </div>
             <p>© 2026 $1K Income Machine. All rights reserved. Made with <i class="fas fa-heart" style="color:#00e676; text-shadow:0 0 30px rgba(0,200,83,.3);"></i> for creators.</p>
         </div>
@@ -747,10 +757,8 @@
 
         // Show success area after purchase (demo)
         document.addEventListener('DOMContentLoaded', function() {
-            // If URL has ?success=1, show success area
             if(window.location.search.includes('success=1')) {
                 document.getElementById('successArea').style.display = 'block';
-                // scroll to it
                 setTimeout(() => {
                     document.getElementById('successArea').scrollIntoView({ behavior: 'smooth' });
                 }, 300);
