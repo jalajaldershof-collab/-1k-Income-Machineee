@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    
     <!-- Meta Pixel Code -->
     <script>
         !function(f,b,e,v,n,t,s)
@@ -12,26 +11,245 @@
         t.src=v;s=b.getElementsByTagName(e)[0];
         s.parentNode.insertBefore(t,s)}(window, document,'script',
         'https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '1690917758676510');
-        fbq('track', 'PageView');
+        
+        // Initialize with proper user_data parameters
+        fbq('init', '1690917758676510', {
+            // These will be populated from localStorage if available
+            em: localStorage.getItem('user_email') || undefined,
+            ph: localStorage.getItem('user_phone') || undefined,
+            fn: localStorage.getItem('user_first_name') || undefined,
+            ln: localStorage.getItem('user_last_name') || undefined,
+            ct: localStorage.getItem('user_city') || undefined,
+            st: localStorage.getItem('user_state') || undefined,
+            zp: localStorage.getItem('user_zip') || undefined,
+            country: localStorage.getItem('user_country') || undefined,
+            external_id: localStorage.getItem('user_id') || undefined,
+            client_ip_address: '{{client_ip_address}}',
+            client_user_agent: navigator.userAgent,
+            fbp: document.cookie.split(';').find(c => c.trim().startsWith('_fbp='))?.split('=')[1] || undefined,
+            fbc: document.cookie.split(';').find(c => c.trim().startsWith('_fbc='))?.split('=')[1] || undefined
+        });
+
+        // Track PageView with all required parameters
+        fbq('track', 'PageView', {
+            content_name: 'First Customer System - Upsell',
+            content_category: 'Digital Product',
+            content_type: 'product',
+            content_ids: ['FCS-UPS-001'],
+            currency: 'USD'
+        }, {
+            eventID: 'pageview_upsell_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+        });
+    </script>
+    <noscript>
+        <img height="1" width="1" style="display:none"
+            src="https://www.facebook.com/tr?id=1690917758676510&ev=PageView&noscript=1&cd%5Bcontent_name%5D=First%20Customer%20System%20-%20Upsell&cd%5Bcontent_category%5D=Digital%20Product&cd%5Bcontent_type%5D=product&cd%5Bcontent_ids%5D=FCS-UPS-001&cd%5Bcurrency%5D=USD"
+        />
+    </noscript>
+    <!-- End Meta Pixel Code -->
+
+    <!-- Zaraz Tracking Function with proper parameters -->
+    <script>
+        // Function to get fbc from cookie (preserve original case)
+        function getFbc() {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === '_fbc') {
+                    return value; // Return as-is, preserve case
+                }
+            }
+            return null;
+        }
+
+        // Function to get fbp from cookie
+        function getFbp() {
+            const cookies = document.cookie.split(';');
+            for (let cookie of cookies) {
+                const [name, value] = cookie.trim().split('=');
+                if (name === '_fbp') {
+                    return value;
+                }
+            }
+            return null;
+        }
+
+        // Enhanced trackConversion function
+        function trackConversion(eventName, eventData = {}) {
+            // Collect user data from localStorage
+            const userData = {
+                email: localStorage.getItem('user_email') || '',
+                phone: localStorage.getItem('user_phone') || '',
+                firstName: localStorage.getItem('user_first_name') || '',
+                lastName: localStorage.getItem('user_last_name') || '',
+                city: localStorage.getItem('user_city') || '',
+                state: localStorage.getItem('user_state') || '',
+                zip: localStorage.getItem('user_zip') || '',
+                country: localStorage.getItem('user_country') || '',
+                userId: localStorage.getItem('user_id') || ''
+            };
+
+            // Prepare the event data with all required parameters
+            const trackingData = {
+                event_name: eventName,
+                user_data: {
+                    em: userData.email || undefined,
+                    ph: userData.phone || undefined,
+                    fn: userData.firstName || undefined,
+                    ln: userData.lastName || undefined,
+                    ct: userData.city || undefined,
+                    st: userData.state || undefined,
+                    zp: userData.zip || undefined,
+                    country: userData.country || undefined,
+                    external_id: userData.userId || undefined,
+                    client_ip_address: '{{client_ip_address}}',
+                    client_user_agent: navigator.userAgent,
+                    fbp: getFbp() || undefined,
+                    fbc: getFbc() || undefined // Preserve original case
+                },
+                custom_data: {
+                    ...eventData,
+                    event_source_url: window.location.href,
+                    page_title: document.title,
+                    content_ids: eventData.content_ids || ['FCS-UPS-001'],
+                    content_name: eventData.content_name || 'First Customer System - Upsell',
+                    content_type: eventData.content_type || 'product'
+                },
+                event_id: eventName + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+            };
+
+            // Send via Zaraz if available
+            if (typeof zaraz !== 'undefined' && zaraz.track) {
+                zaraz.track(eventName, trackingData);
+            }
+
+            // Also send via Facebook Pixel for redundancy
+            if (typeof fbq !== 'undefined') {
+                fbq('track', eventName, {
+                    ...eventData,
+                    // Include user data as custom parameters
+                    em: userData.email || undefined,
+                    ph: userData.phone || undefined,
+                    fn: userData.firstName || undefined,
+                    ln: userData.lastName || undefined,
+                    ct: userData.city || undefined,
+                    st: userData.state || undefined,
+                    zp: userData.zip || undefined,
+                    country: userData.country || undefined,
+                    external_id: userData.userId || undefined,
+                    fbp: getFbp() || undefined,
+                    fbc: getFbc() || undefined
+                }, {
+                    eventID: trackingData.event_id
+                });
+            }
+
+            return trackingData;
+        }
+
+        // Function to set user data (call this when user provides info)
+        function setUserData(userData) {
+            Object.keys(userData).forEach(key => {
+                localStorage.setItem('user_' + key, userData[key]);
+            });
+            // Re-initialize Facebook Pixel with new user data
+            fbq('init', '1690917758676510', {
+                em: userData.email || undefined,
+                ph: userData.phone || undefined,
+                fn: userData.firstName || undefined,
+                ln: userData.lastName || undefined,
+                ct: userData.city || undefined,
+                st: userData.state || undefined,
+                zp: userData.zip || undefined,
+                country: userData.country || undefined,
+                external_id: userData.userId || undefined,
+                fbp: getFbp() || undefined,
+                fbc: getFbc() || undefined
+            });
+        }
+
+        // Function to get fbclid from URL and store it
+        function storeFbclid() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const fbclid = urlParams.get('fbclid');
+            if (fbclid) {
+                // Store the exact value without modification
+                document.cookie = '_fbc=' + fbclid + '; path=/; max-age=7776000'; // 90 days
+                localStorage.setItem('fbclid', fbclid);
+            }
+        }
+
+        // Store fbclid when page loads
+        storeFbclid();
+
+        // Function to track InitiateCheckout with proper parameters
+        function initiateUpsellCheckout() {
+            // Calculate total based on selected upsells
+            let total = 17;
+            const selectedUpsell1 = document.querySelector('#checkbox1')?.classList.contains('selected') || false;
+            const selectedUpsell2 = document.querySelector('#checkbox2')?.classList.contains('selected') || false;
+
+            if (selectedUpsell1) total += 10;
+            if (selectedUpsell2) total += 27;
+
+            // Get content IDs based on selection
+            let contentIds = ['FCS-001'];
+            if (selectedUpsell1) contentIds.push('FCS-UPS-001');
+            if (selectedUpsell2) contentIds.push('FCS-UPS-002');
+
+            const eventData = {
+                content_name: 'First Customer System Bundle',
+                content_type: 'product',
+                currency: 'USD',
+                value: total,
+                content_ids: contentIds,
+                contents: [
+                    { id: 'FCS-001', quantity: 1, item_price: 17 },
+                    ...(selectedUpsell1 ? [{ id: 'FCS-UPS-001', quantity: 1, item_price: 10 }] : []),
+                    ...(selectedUpsell2 ? [{ id: 'FCS-UPS-002', quantity: 1, item_price: 27 }] : [])
+                ],
+                num_items: contentIds.length,
+                payment_method: 'stripe',
+                shipping_method: 'digital'
+            };
+
+            // Track the event
+            trackConversion('InitiateCheckout', eventData);
+
+            // Also track the specific upsell selections as custom events if needed
+            if (selectedUpsell1) {
+                trackConversion('Upsell1Selected', {
+                    content_name: 'Whop Sellers Launchpad',
+                    content_type: 'product',
+                    value: 10,
+                    currency: 'USD'
+                });
+            }
+            if (selectedUpsell2) {
+                trackConversion('Upsell2Selected', {
+                    content_name: 'Free Client Formula',
+                    content_type: 'product',
+                    value: 27,
+                    currency: 'USD'
+                });
+            }
+
+            // Store the order data for the thank you page
+            localStorage.setItem('order_data', JSON.stringify({
+                total: total,
+                items: contentIds,
+                selectedUpsell1: selectedUpsell1,
+                selectedUpsell2: selectedUpsell2
+            }));
+        }
+
+        // Expose functions globally
+        window.trackConversion = trackConversion;
+        window.setUserData = setUserData;
+        window.initiateUpsellCheckout = initiateUpsellCheckout;
+        window.storeFbclid = storeFbclid;
     </script>
 
-    <script>
-function initiateUpsellCheckout() {
-    fbq('track', 'InitiateCheckout', {
-        content_name: 'First Customer System',
-        content_type: 'product',
-        currency: 'USD'
-    });
-}
-</script>
-
-<script>
-function trackConversion(eventName) {
-    zaraz.track(eventName);
-}
-</script>
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>$1K Income Machine — Epic Upsell</title>
@@ -973,217 +1191,216 @@ function trackConversion(eventName) {
         }
 
         /* ===== BOTTOM SECTION - IMAGE + STORY PAIRS ===== */
-.bottom-section {
-    margin: 35px 0 45px 0;
-}
+        .bottom-section {
+            margin: 35px 0 45px 0;
+        }
 
-.section-headline {
-    margin-bottom: 40px;
-}
+        .section-headline {
+            margin-bottom: 40px;
+        }
 
-.section-headline .section-title {
-    font-size: 2rem;
-    font-weight: 900;
-    margin-bottom: 8px;
-    background: linear-gradient(135deg, #ffffff 0%, #69f0ae 50%, #82b1ff 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    text-shadow: 0 0 60px rgba(0, 200, 83, 0.15);
-}
+        .section-headline .section-title {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff 0%, #69f0ae 50%, #82b1ff 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 60px rgba(0, 200, 83, 0.15);
+        }
 
-.section-headline .section-sub {
-    color: #aaaaaa;
-    font-size: 1.1rem;
-    max-width: 700px;
-    margin: 0 auto;
-}
+        .section-headline .section-sub {
+            color: #aaaaaa;
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
 
-/* Image + Story Pair */
-.image-story-pair {
-    margin-bottom: 10px;
-}
+        /* Image + Story Pair */
+        .image-story-pair {
+            margin-bottom: 10px;
+        }
 
-.image-tile {
-    background: linear-gradient(145deg, #0d0d0d, #080808);
-    border-radius: 32px;
-    padding: 35px;
-    border: 1px solid rgba(42, 42, 42, 0.5);
-    box-shadow: 0 15px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 200, 83, 0.03);
-    transition: all 0.5s ease;
-    display: flex;
-    gap: 35px;
-    align-items: center;
-}
+        .image-tile {
+            background: linear-gradient(145deg, #0d0d0d, #080808);
+            border-radius: 32px;
+            padding: 35px;
+            border: 1px solid rgba(42, 42, 42, 0.5);
+            box-shadow: 0 15px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(0, 200, 83, 0.03);
+            transition: all 0.5s ease;
+            display: flex;
+            gap: 35px;
+            align-items: center;
+        }
 
-.image-tile:hover {
-    border-color: rgba(0, 200, 83, 0.2);
-    box-shadow: 0 25px 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(0, 200, 83, 0.06);
-    transform: translateY(-4px);
-}
+        .image-tile:hover {
+            border-color: rgba(0, 200, 83, 0.2);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.9), 0 0 60px rgba(0, 200, 83, 0.06);
+            transform: translateY(-4px);
+        }
 
-.bottom-image {
-    flex: 1;
-    min-width: 200px;
-    height: 220px;
-    border-radius: 20px;
-    background: #111111;
-    border: 1px solid #2a2a2a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5), 0 8px 30px rgba(0, 0, 0, 0.3);
-    position: relative;
-}
+        .bottom-image {
+            flex: 1;
+            min-width: 200px;
+            height: 220px;
+            border-radius: 20px;
+            background: #111111;
+            border: 1px solid #2a2a2a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5), 0 8px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
 
-.bottom-image::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.2) 100%);
-    pointer-events: none;
-}
+        .bottom-image::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.2) 100%);
+            pointer-events: none;
+        }
 
-.bottom-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    position: relative;
-    z-index: 0;
-}
+        .bottom-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: relative;
+            z-index: 0;
+        }
 
-.bottom-image .placeholder {
-    color: #444;
-    font-size: 0.9rem;
-    text-align: center;
-    z-index: 1;
-    position: absolute;
-}
+        .bottom-image .placeholder {
+            color: #444;
+            font-size: 0.9rem;
+            text-align: center;
+            z-index: 1;
+            position: absolute;
+        }
 
-.bottom-image .placeholder i {
-    font-size: 3rem;
-    color: #333;
-    display: block;
-    margin-bottom: 8px;
-}
+        .bottom-image .placeholder i {
+            font-size: 3rem;
+            color: #333;
+            display: block;
+            margin-bottom: 8px;
+        }
 
-.story-content {
-    flex: 2;
-    min-width: 200px;
-}
+        .story-content {
+            flex: 2;
+            min-width: 200px;
+        }
 
-.story-title {
-    font-size: 1.3rem;
-    font-weight: 800;
-    color: #ffffff;
-    margin-bottom: 10px;
-    letter-spacing: -0.3px;
-}
+        .story-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 10px;
+            letter-spacing: -0.3px;
+        }
 
-.story-title i {
-    color: #69f0ae;
-}
+        .story-title i {
+            color: #69f0ae;
+        }
 
-.story-text {
-    color: #bbbbbb;
-    font-size: 1rem;
-    line-height: 1.8;
-    margin-bottom: 14px;
-}
+        .story-text {
+            color: #bbbbbb;
+            font-size: 1rem;
+            line-height: 1.8;
+            margin-bottom: 14px;
+        }
 
-.story-author {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    color: #888888;
-    font-size: 0.9rem;
-    padding-top: 12px;
-    border-top: 1px solid rgba(42, 42, 42, 0.3);
-}
+        .story-author {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #888888;
+            font-size: 0.9rem;
+            padding-top: 12px;
+            border-top: 1px solid rgba(42, 42, 42, 0.3);
+        }
 
-.story-author i {
-    font-size: 1.4rem;
-}
+        .story-author i {
+            font-size: 1.4rem;
+        }
 
-.story-author strong {
-    color: #ffffff;
-}
+        .story-author strong {
+            color: #ffffff;
+        }
 
-/* Divider between pairs */
-.story-divider {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(0, 200, 83, 0.15), transparent);
-    margin: 30px 0;
-}
+        /* Divider between pairs */
+        .story-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(0, 200, 83, 0.15), transparent);
+            margin: 30px 0;
+        }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 768px) {
-    .image-tile {
-        flex-direction: column;
-        padding: 24px;
-    }
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .image-tile {
+                flex-direction: column;
+                padding: 24px;
+            }
 
-    .bottom-image {
-        width: 100%;
-        height: 180px;
-        min-width: unset;
-    }
+            .bottom-image {
+                width: 100%;
+                height: 180px;
+                min-width: unset;
+            }
 
-    .story-content {
-        width: 100%;
-        min-width: unset;
-    }
+            .story-content {
+                width: 100%;
+                min-width: unset;
+            }
 
-    .story-title {
-        font-size: 1.1rem;
-    }
+            .story-title {
+                font-size: 1.1rem;
+            }
 
-    .story-text {
-        font-size: 0.95rem;
-    }
+            .story-text {
+                font-size: 0.95rem;
+            }
 
-    .section-headline .section-title {
-        font-size: 1.6rem;
-    }
+            .section-headline .section-title {
+                font-size: 1.6rem;
+            }
 
-    .section-headline .section-sub {
-        font-size: 1rem;
-    }
+            .section-headline .section-sub {
+                font-size: 1rem;
+            }
 
-    .story-divider {
-        margin: 20px 0;
-    }
-}
+            .story-divider {
+                margin: 20px 0;
+            }
+        }
 
-@media (max-width: 480px) {
-    .image-tile {
-        padding: 18px;
-        border-radius: 24px;
-    }
+        @media (max-width: 480px) {
+            .image-tile {
+                padding: 18px;
+                border-radius: 24px;
+            }
 
-    .bottom-image {
-        height: 150px;
-    }
+            .bottom-image {
+                height: 150px;
+            }
 
-    .story-title {
-        font-size: 1rem;
-    }
+            .story-title {
+                font-size: 1rem;
+            }
 
-    .story-text {
-        font-size: 0.9rem;
-    }
+            .story-text {
+                font-size: 0.9rem;
+            }
 
-    .story-author {
-        font-size: 0.8rem;
-        flex-wrap: wrap;
-    }
+            .story-author {
+                font-size: 0.8rem;
+                flex-wrap: wrap;
+            }
 
-    .section-headline .section-title {
-        font-size: 1.3rem;
-    }
-}
-        
+            .section-headline .section-title {
+                font-size: 1.3rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1245,7 +1462,7 @@ function trackConversion(eventName) {
                 <div class="price">
                     $10 <span class="original">$147</span>
                 </div>
-                <p class="description">Get your offer live in <strong>hours, not weeks</strong>. <strong>5 Prompts</strong>strong> to A Sellable Product People Are Already Begging to Buy.</p>
+                <p class="description">Get your offer live in <strong>hours, not weeks</strong>. <strong>5 Prompts</strong> to A Sellable Product People Are Already Begging to Buy.</p>
                 <ul class="features">
                     <li><i class="fas fa-check check"></i> 11 complete modules — the full path from product idea to first sales</li>
                     <li><i class="fas fa-check check"></i> AI Prompt Vault — copy, paste into ChatGPT or Claude, get a ready output in seconds</li>
@@ -1290,8 +1507,8 @@ function trackConversion(eventName) {
             <div class="savings" id="savingsDisplay">
                 <i class="fas fa-tag" style="margin-right: 6px;"></i> You save $0
             </div>
-            <div onclick="checkout()" class="cta-wrapper">
-                <button class="btn-primary" onclick="initiateUpsellCheckout()">
+            <div class="cta-wrapper">
+                <button class="btn-primary" onclick="handleCheckout()">
                     <i class="fas fa-lock" style="margin-right: 12px;"></i> Secure Your Order
                 </button>
             </div>
@@ -1299,71 +1516,68 @@ function trackConversion(eventName) {
     </section>
 
     <!-- ===== BOTTOM SECTION (Updated with Image + Story pairs) ===== -->
-<section class="bottom-section container">
-    <!-- Headline at the top -->
-    <div class="section-headline">
-        <h2 class="section-title" style="text-align: center; font-size: 2rem; margin-bottom: 8px;">
-             The <span style="color: #69f0ae;">"Unfair Advantage"</span> Bundle
-        </h2>
-        <p class="section-sub" style="text-align: center; margin-bottom: 30px; font-size: 1.1rem;">
-            Most creators who get all three products see results <strong style="color: #ffffff;">5x faster</strong>.
-        </p>
-    </div>
+    <section class="bottom-section container">
+        <!-- Headline at the top -->
+        <div class="section-headline">
+            <h2 class="section-title" style="text-align: center; font-size: 2rem; margin-bottom: 8px;">
+                The <span style="color: #69f0ae;">"Unfair Advantage"</span> Bundle
+            </h2>
+            <p class="section-sub" style="text-align: center; margin-bottom: 30px; font-size: 1.1rem;">
+                Most creators who get all three products see results <strong style="color: #ffffff;">5x faster</strong>.
+            </p>
+        </div>
 
-    <!-- Image + Story Pair 1 -->
-    <div class="image-story-pair">
-        <div class="image-tile">
-            <div class="bottom-image">
-                <img src="Assets/review3.jpg" alt="Success Story 1" style="width: 100%; height: 100%; object-fit: contain; object-position: center; position: relative; z-index: 0;">
-                <!-- Fallback placeholder if image not found -->
-                <div class="placeholder" style="display: none;">
-                    <i class="fas fa-image"></i>
-                    <span>Image 1</span>
+        <!-- Image + Story Pair 1 -->
+        <div class="image-story-pair">
+            <div class="image-tile">
+                <div class="bottom-image">
+                    <img src="Assets/review3.jpg" alt="Success Story 1" style="width: 100%; height: 100%; object-fit: contain; object-position: center; position: relative; z-index: 0;">
+                    <!-- Fallback placeholder if image not found -->
+                    <div class="placeholder" style="display: none;">
+                        <i class="fas fa-image"></i>
+                        <span>Image 1</span>
+                    </div>
                 </div>
-            </div>
-            <div class="story-content">
-                <h3 class="story-title">From Zero to €8,700 in 7 Days</h3>
-                <p class="story-text">
-                    "Jakub started the week with nothing but the same 3-product stack you're looking at right now. Seven days later — €8,251 in gross volume, a 213% jump from the week before. No agency, no ad team, no guesswork."
-                </p>
-                <div class="story-author">
-                    <i  style="color: #69f0ae;"></i>
-                    <span><strong>—Jakub Englart</strong>  </span>
+                <div class="story-content">
+                    <h3 class="story-title">From Zero to €8,700 in 7 Days</h3>
+                    <p class="story-text">
+                        "Jakub started the week with nothing but the same 3-product stack you're looking at right now. Seven days later — €8,251 in gross volume, a 213% jump from the week before. No agency, no ad team, no guesswork."
+                    </p>
+                    <div class="story-author">
+                        <i style="color: #69f0ae;"></i>
+                        <span><strong>—Jakub Englart</strong></span>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Divider between pairs -->
-    <div class="story-divider"></div>
+        <!-- Divider between pairs -->
+        <div class="story-divider"></div>
 
-    <!-- Image + Story Pair 2 -->
-    <div class="image-story-pair">
-        <div class="image-tile">
-            <div class="bottom-image">
-                <img src="Assets/mainreview.jpg" alt="Success Story 2" style="width: 100%; height: 100%; object-fit: contain; object-position: center; position: relative; z-index: 0;">
-                <!-- Fallback placeholder if image not found -->
-                <div class="placeholder" style="display: none;">
-                    <i class="fas fa-image"></i>
-                    <span>Image 2</span>
+        <!-- Image + Story Pair 2 -->
+        <div class="image-story-pair">
+            <div class="image-tile">
+                <div class="bottom-image">
+                    <img src="Assets/mainreview.jpg" alt="Success Story 2" style="width: 100%; height: 100%; object-fit: contain; object-position: center; position: relative; z-index: 0;">
+                    <!-- Fallback placeholder if image not found -->
+                    <div class="placeholder" style="display: none;">
+                        <i class="fas fa-image"></i>
+                        <span>Image 2</span>
+                    </div>
                 </div>
-            </div>
-            <div class="story-content">
-                <h3 class="story-title">$10K in His First Month — 12 Days Early</h3>
-                <p class="story-text">
-                    "Thomas set out to hit $10K in month one. He got there with 12 days to spare. His words: "Once you know what your market wants and how to deliver, it's so easy to make money."
-                </p>
-                <div class="story-author">
-                    <i style="color: #69f0ae;"></i>
-                    <span><strong>—Thomas</strong></span>
+                <div class="story-content">
+                    <h3 class="story-title">$10K in His First Month — 12 Days Early</h3>
+                    <p class="story-text">
+                        "Thomas set out to hit $10K in month one. He got there with 12 days to spare. His words: "Once you know what your market wants and how to deliver, it's so easy to make money."
+                    </p>
+                    <div class="story-author">
+                        <i style="color: #69f0ae;"></i>
+                        <span><strong>—Thomas</strong></span>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
-
-    <!-- Optional: Add more pairs by copying the .image-story-pair block -->
-</section>
+    </section>
 
     <!-- Footer -->
     <footer>
@@ -1375,177 +1589,176 @@ function trackConversion(eventName) {
     </footer>
 
     <!-- JavaScript for Upsell Selection & Dynamic Pricing -->
-<script>
-    // Prices
-    const basePrice = 17;
-    const upsell1Price = 10;
-    const upsell2Price = 27;
+    <script>
+        // Prices
+        const basePrice = 17;
+        const upsell1Price = 10;
+        const upsell2Price = 27;
 
-    let selectedUpsell1 = false;
-    let selectedUpsell2 = false;
+        let selectedUpsell1 = false;
+        let selectedUpsell2 = false;
 
-    // ============================================
-    // CHECKOUT REDIRECT LOGIC
-    // ============================================
-    // ⚠️ REPLACE THESE URLs WITH YOUR ACTUAL CHECKOUT PAGES
-    const CHECKOUT_URLS = {
-        none: 'https://whop.com/c/first-customer-blueprint/1',     // No upsell selected
-        upsell1: 'https://whop.com/c/the-bundle-offer/2',  // Only Upsell 1 selected
-        upsell2: 'https://whop.com/c/freeclientsystem/4',  // Only Upsell 2 selected
-        both: 'https://whop.com/c/ultraoffer/3'      // Both upsells selected
-    };
+        // ============================================
+        // CHECKOUT FUNCTION WITH EVENT TRACKING
+        // ============================================
+        function handleCheckout() {
+            // Track InitiateCheckout with all parameters
+            initiateUpsellCheckout();
+            
+            // Calculate total based on selected upsells
+            let total = basePrice;
+            const hasUpsell1 = selectedUpsell1;
+            const hasUpsell2 = selectedUpsell2;
 
-    function checkout() {
-        const hasUpsell1 = selectedUpsell1;
-        const hasUpsell2 = selectedUpsell2;
-        
-        let redirectUrl = '';
-        
-        if (hasUpsell1 && hasUpsell2) {
-            redirectUrl = CHECKOUT_URLS.both;
-        } else if (hasUpsell1 && !hasUpsell2) {
-            redirectUrl = CHECKOUT_URLS.upsell1;
-        } else if (!hasUpsell1 && hasUpsell2) {
-            redirectUrl = CHECKOUT_URLS.upsell2;
-        } else {
-            redirectUrl = CHECKOUT_URLS.none;
-        }
+            if (hasUpsell1) total += upsell1Price;
+            if (hasUpsell2) total += upsell2Price;
 
-        // Show loading state on button
-        const btn = document.querySelector('.btn-primary');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '⏳ Redirecting...';
-        btn.style.opacity = '0.7';
-        btn.disabled = true;
-
-        // Redirect immediately
-        window.location.href = redirectUrl;
-    }
-
-    // ============================================
-    // TOGGLE UPSELL FUNCTION
-    // ============================================
-    function toggleUpsell(tileId, checkboxId) {
-        // Toggle the selection state
-        if (tileId === 'upsell1') {
-            selectedUpsell1 = !selectedUpsell1;
-            const checkbox = document.getElementById(checkboxId);
-            if (checkbox) {
-                checkbox.classList.toggle('selected');
-            }
-        } else if (tileId === 'upsell2') {
-            selectedUpsell2 = !selectedUpsell2;
-            const checkbox = document.getElementById(checkboxId);
-            if (checkbox) {
-                checkbox.classList.toggle('selected');
-            }
-        }
-        updateTotal();
-    }
-
-    // Update total price with animation
-    function updateTotal() {
-        let total = basePrice;
-        let savings = 0;
-
-        if (selectedUpsell1) {
-            total += upsell1Price;
-            savings += (147 - upsell1Price);
-        }
-
-        if (selectedUpsell2) {
-            total += upsell2Price;
-            savings += (197 - upsell2Price);
-        }
-
-        let originalTotal = basePrice;
-        if (selectedUpsell1) originalTotal += 147;
-        if (selectedUpsell2) originalTotal += 197;
-
-        const totalSavings = originalTotal - total;
-
-        const priceElement = document.getElementById('totalPrice');
-        if (priceElement) {
-            priceElement.style.transform = 'scale(1.15)';
-            setTimeout(() => {
-                priceElement.style.transform = 'scale(1)';
-            }, 200);
-            priceElement.textContent = total;
-        }
-
-        const savingsDisplay = document.getElementById('savingsDisplay');
-        if (savingsDisplay) {
-            if (totalSavings > 0) {
-                savingsDisplay.innerHTML = `<i class="fas fa-tag" style="margin-right: 6px;"></i> You save $${totalSavings}`;
-                savingsDisplay.style.display = 'inline-block';
+            // Redirect based on selection
+            let redirectUrl = '';
+            
+            if (hasUpsell1 && hasUpsell2) {
+                redirectUrl = 'https://whop.com/c/ultraoffer/3';
+            } else if (hasUpsell1 && !hasUpsell2) {
+                redirectUrl = 'https://whop.com/c/the-bundle-offer/2';
+            } else if (!hasUpsell1 && hasUpsell2) {
+                redirectUrl = 'https://whop.com/c/freeclientsystem/4';
             } else {
-                savingsDisplay.innerHTML = `<i class="fas fa-tag" style="margin-right: 6px;"></i> You save $0`;
+                redirectUrl = 'https://whop.com/c/first-customer-blueprint/1';
+            }
+
+            // Show loading state on button
+            const btn = document.querySelector('.btn-primary');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '⏳ Redirecting...';
+            btn.style.opacity = '0.7';
+            btn.disabled = true;
+
+            // Redirect
+            window.location.href = redirectUrl;
+        }
+
+        // ============================================
+        // TOGGLE UPSELL FUNCTION
+        // ============================================
+        function toggleUpsell(tileId, checkboxId) {
+            // Toggle the selection state
+            if (tileId === 'upsell1') {
+                selectedUpsell1 = !selectedUpsell1;
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox) {
+                    checkbox.classList.toggle('selected');
+                }
+            } else if (tileId === 'upsell2') {
+                selectedUpsell2 = !selectedUpsell2;
+                const checkbox = document.getElementById(checkboxId);
+                if (checkbox) {
+                    checkbox.classList.toggle('selected');
+                }
+            }
+            updateTotal();
+        }
+
+        // Update total price with animation
+        function updateTotal() {
+            let total = basePrice;
+            let savings = 0;
+
+            if (selectedUpsell1) {
+                total += upsell1Price;
+                savings += (147 - upsell1Price);
+            }
+
+            if (selectedUpsell2) {
+                total += upsell2Price;
+                savings += (197 - upsell2Price);
+            }
+
+            let originalTotal = basePrice;
+            if (selectedUpsell1) originalTotal += 147;
+            if (selectedUpsell2) originalTotal += 197;
+
+            const totalSavings = originalTotal - total;
+
+            const priceElement = document.getElementById('totalPrice');
+            if (priceElement) {
+                priceElement.style.transform = 'scale(1.15)';
+                setTimeout(() => {
+                    priceElement.style.transform = 'scale(1)';
+                }, 200);
+                priceElement.textContent = total;
+            }
+
+            const savingsDisplay = document.getElementById('savingsDisplay');
+            if (savingsDisplay) {
+                if (totalSavings > 0) {
+                    savingsDisplay.innerHTML = `<i class="fas fa-tag" style="margin-right: 6px;"></i> You save $${totalSavings}`;
+                    savingsDisplay.style.display = 'inline-block';
+                } else {
+                    savingsDisplay.innerHTML = `<i class="fas fa-tag" style="margin-right: 6px;"></i> You save $0`;
+                }
             }
         }
-    }
 
-    // ============================================
-    // EVENT LISTENERS
-    // ============================================
-    // Wait for the page to load
-    document.addEventListener('DOMContentLoaded', function() {
-        
-        // Make the entire tile clickable (but NOT the checkbox inside it)
-        document.querySelectorAll('.upsell-tile').forEach(function(tile) {
-            tile.addEventListener('click', function(e) {
-                // If the click was on the checkbox or its children, ignore it
-                if (e.target.closest('.selection-checkbox')) {
-                    return;
-                }
-                
-                const id = this.id;
-                if (id === 'upsell1') {
-                    toggleUpsell('upsell1', 'checkbox1');
-                } else if (id === 'upsell2') {
-                    toggleUpsell('upsell2', 'checkbox2');
-                }
-            });
-        });
-
-        // Make checkboxes clickable
-        document.querySelectorAll('.selection-checkbox').forEach(function(checkbox) {
-            checkbox.addEventListener('click', function(e) {
-                e.stopPropagation();
-                
-                const tile = this.closest('.upsell-tile');
-                if (tile) {
-                    const id = tile.id;
+        // ============================================
+        // EVENT LISTENERS
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            // Make the entire tile clickable (but NOT the checkbox inside it)
+            document.querySelectorAll('.upsell-tile').forEach(function(tile) {
+                tile.addEventListener('click', function(e) {
+                    // If the click was on the checkbox or its children, ignore it
+                    if (e.target.closest('.selection-checkbox')) {
+                        return;
+                    }
+                    
+                    const id = this.id;
                     if (id === 'upsell1') {
                         toggleUpsell('upsell1', 'checkbox1');
                     } else if (id === 'upsell2') {
                         toggleUpsell('upsell2', 'checkbox2');
                     }
-                }
+                });
             });
+
+            // Make checkboxes clickable
+            document.querySelectorAll('.selection-checkbox').forEach(function(checkbox) {
+                checkbox.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    const tile = this.closest('.upsell-tile');
+                    if (tile) {
+                        const id = tile.id;
+                        if (id === 'upsell1') {
+                            toggleUpsell('upsell1', 'checkbox1');
+                        } else if (id === 'upsell2') {
+                            toggleUpsell('upsell2', 'checkbox2');
+                        }
+                    }
+                });
+            });
+
+            // Initial price update
+            updateTotal();
         });
 
-        // Initial price update
-        updateTotal();
-    });
+        // Add CSS animation for savings pulse
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+                100% { transform: scale(1); }
+            }
+            .selection-checkbox {
+                cursor: pointer !important;
+            }
+            .upsell-tile {
+                cursor: pointer !important;
+            }
+        `;
+        document.head.appendChild(style);
 
-    // Add CSS animation for savings pulse
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        .selection-checkbox {
-            cursor: pointer !important;
-        }
-        .upsell-tile {
-            cursor: pointer !important;
-        }
-    `;
-    document.head.appendChild(style);
-
-    console.log('Upsell page loaded! Click a tile or checkbox to select.');
-</script>
+        console.log('Upsell page loaded! Click a tile or checkbox to select.');
+    </script>
 </body>
 </html>
