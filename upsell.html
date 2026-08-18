@@ -5,166 +5,175 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- Meta Pixel Code -->
-    <script>
-        !function(f,b,e,v,n,t,s)
-        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-        n.queue=[];t=b.createElement(e);t.async=!0;
-        t.src=v;s=b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t,s)}(window, document,'script',
-        'https://connect.facebook.net/en_US/fbevents.js');
-        
-        // Initialize with only what's available
-        (function initPixel() {
-            const getFbc = () => {
-                const cookies = document.cookie.split(';');
-                for (let cookie of cookies) {
-                    const [name, value] = cookie.trim().split('=');
-                    if (name === '_fbc') {
-                        return value;
-                    }
-                }
-                return null;
-            };
+   <!-- Meta Pixel Code -->
+<script>
+    !function(f,b,e,v,n,t,s) {
+        if(f.fbq)return;
+        n=f.fbq=function(){n.callMethod? n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;
+        n.push=n;
+        n.loaded=!0;
+        n.version='2.0';
+        n.queue=[];
+        t=b.createElement(e);
+        t.async=!0;
+        t.src=v;
+        s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)
+    }(window, document,'script', 'https://connect.facebook.net/en_US/fbevents.js');
 
-            const getFbp = () => {
-                const cookies = document.cookie.split(';');
-                for (let cookie of cookies) {
-                    const [name, value] = cookie.trim().split('=');
-                    if (name === '_fbp') {
-                        return value;
-                    }
-                }
-                return null;
-            };
+    // ====== HELPER FUNCTIONS ======
 
-            fbq('init', '1690917758676510', {
-                client_ip_address: '{{client_ip_address}}',
-                client_user_agent: navigator.userAgent,
-                fbp: getFbp() || undefined,
-                fbc: getFbc() || undefined
-            });
+    // Get fbp from cookie
+    function getFbp() {
+        const match = document.cookie.match(/_fbp=([^;]+)/);
+        return match ? match[1] : null;
+    }
 
-            fbq('track', 'PageView', {
-                content_name: 'First Customer System - Upsell',
-                content_category: 'Digital Product',
-                content_type: 'product',
-                content_ids: ['FCS-UPS-001']
+    // Get fbc from cookie
+    function getFbc() {
+        const match = document.cookie.match(/_fbc=([^;]+)/);
+        return match ? match[1] : null;
+    }
+
+    // Store fbclid as properly formatted _fbc cookie
+    function storeFbclid() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const fbclid = urlParams.get('fbclid');
+
+        if (fbclid) {
+            // IMPORTANT: fbclid must be formatted as _fbc
+            // Format: fb.1.{timestamp}.{fbclid}
+            const timestamp = Math.floor(Date.now() / 1000);
+            const formattedFbc = 'fb.1.' + timestamp + '.' + fbclid;
+            document.cookie = '_fbc=' + formattedFbc + '; path=/; max-age=7776000';
+        }
+    }
+
+    // ====== STORE FBCLID ON LOAD ======
+    storeFbclid();
+
+    // ====== INITIALIZE PIXEL ======
+    (function initPixel() {
+        const fbp = getFbp();
+        const fbc = getFbc();
+
+        // User data for matching (fbp and fbc go here!)
+        const userData = {};
+
+        // Only add if they exist
+        if (fbp) userData.fbp = fbp;
+        if (fbc) userData.fbc = fbc;
+
+        // Initialize with user data
+        fbq('init', '1690917758676510', userData);
+
+        // Track PageView - UPSPECIFIC
+        fbq('track', 'PageView', {
+            content_name: 'First Customer System - Upsell',
+            content_category: 'Digital Product',
+            content_type: 'product',
+            content_ids: ['FCS-UPS-001']
+        }, {
+            eventID: 'pageview_upsell_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+        });
+    })();
+</script>
+<noscript>
+    <img height="1" width="1" style="display:none"
+        src="https://www.facebook.com/tr?id=1690917758676510&ev=PageView&noscript=1"
+    />
+</noscript>
+<!-- End Meta Pixel Code -->
+
+<!-- Zaraz Tracking Function -->
+<script>
+    // Helper functions (reused from above)
+    function getFbp() {
+        const match = document.cookie.match(/_fbp=([^;]+)/);
+        return match ? match[1] : null;
+    }
+
+    function getFbc() {
+        const match = document.cookie.match(/_fbc=([^;]+)/);
+        return match ? match[1] : null;
+    }
+
+    function trackConversion(eventName, eventData = {}) {
+        const fbp = getFbp();
+        const fbc = getFbc();
+
+        // Build user data
+        const userData = {};
+        if (fbp) userData.fbp = fbp;
+        if (fbc) userData.fbc = fbc;
+
+        const eventID = eventName + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+        const trackingData = {
+            event_name: eventName,
+            user_data: userData,
+            custom_data: {
+                ...eventData,
+                event_source_url: window.location.href,
+                page_title: document.title
+            },
+            event_id: eventID
+        };
+
+        // Track via Zaraz if available
+        if (typeof zaraz !== 'undefined' && zaraz.track) {
+            zaraz.track(eventName, trackingData);
+        }
+
+        // Track via Meta Pixel
+        if (typeof fbq !== 'undefined') {
+            fbq('track', eventName, {
+                ...eventData
             }, {
-                eventID: 'pageview_upsell_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+                eventID: eventID
             });
-        })();
-    </script>
-    <noscript>
-        <img height="1" width="1" style="display:none"
-            src="https://www.facebook.com/tr?id=1690917758676510&ev=PageView&noscript=1"
-        />
-    </noscript>
-    <!-- End Meta Pixel Code -->
-
-    <!-- Zaraz Tracking Function -->
-    <script>
-        function getFbc() {
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                const [name, value] = cookie.trim().split('=');
-                if (name === '_fbc') {
-                    return value;
-                }
-            }
-            return null;
         }
 
-        function getFbp() {
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                const [name, value] = cookie.trim().split('=');
-                if (name === '_fbp') {
-                    return value;
-                }
-            }
-            return null;
-        }
+        return trackingData;
+    }
 
-        function trackConversion(eventName, eventData = {}) {
-            const trackingData = {
-                event_name: eventName,
-                user_data: {
-                    client_ip_address: '{{client_ip_address}}',
-                    client_user_agent: navigator.userAgent,
-                    fbp: getFbp() || undefined,
-                    fbc: getFbc() || undefined
-                },
-                custom_data: {
-                    ...eventData,
-                    event_source_url: window.location.href,
-                    page_title: document.title
-                },
-                event_id: eventName + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
-            };
+    // ====== UPSELL SPECIFIC FUNCTIONS ======
 
-            if (typeof zaraz !== 'undefined' && zaraz.track) {
-                zaraz.track(eventName, trackingData);
-            }
+    function initiateUpsellCheckout() {
+        let total = 17;
+        const selectedUpsell1 = document.querySelector('#checkbox1')?.classList.contains('selected') || false;
+        const selectedUpsell2 = document.querySelector('#checkbox2')?.classList.contains('selected') || false;
 
-            if (typeof fbq !== 'undefined') {
-                fbq('track', eventName, {
-                    ...eventData,
-                    fbp: getFbp() || undefined,
-                    fbc: getFbc() || undefined
-                }, {
-                    eventID: trackingData.event_id
-                });
-            }
+        if (selectedUpsell1) total += 10;
+        if (selectedUpsell2) total += 27;
 
-            return trackingData;
-        }
+        let contentIds = ['FCS-001'];
+        if (selectedUpsell1) contentIds.push('FCS-UPS-001');
+        if (selectedUpsell2) contentIds.push('FCS-UPS-002');
 
-        function storeFbclid() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const fbclid = urlParams.get('fbclid');
-            if (fbclid) {
-                document.cookie = '_fbc=' + fbclid + '; path=/; max-age=7776000';
-            }
-        }
+        trackConversion('InitiateCheckout', {
+            content_name: 'First Customer System Bundle',
+            content_type: 'product',
+            currency: 'USD',
+            value: total,
+            content_ids: contentIds,
+            num_items: contentIds.length
+        });
 
-        storeFbclid();
+        // Store selection for thankyou page
+        localStorage.setItem('order_data', JSON.stringify({
+            total: total,
+            items: contentIds,
+            selectedUpsell1: selectedUpsell1,
+            selectedUpsell2: selectedUpsell2
+        }));
+    }
 
-        function initiateUpsellCheckout() {
-            let total = 17;
-            const selectedUpsell1 = document.querySelector('#checkbox1')?.classList.contains('selected') || false;
-            const selectedUpsell2 = document.querySelector('#checkbox2')?.classList.contains('selected') || false;
-
-            if (selectedUpsell1) total += 10;
-            if (selectedUpsell2) total += 27;
-
-            let contentIds = ['FCS-001'];
-            if (selectedUpsell1) contentIds.push('FCS-UPS-001');
-            if (selectedUpsell2) contentIds.push('FCS-UPS-002');
-
-            trackConversion('InitiateCheckout', {
-                content_name: 'First Customer System Bundle',
-                content_type: 'product',
-                currency: 'USD',
-                value: total,
-                content_ids: contentIds,
-                num_items: contentIds.length
-            });
-
-            // Store selection for thankyou page
-            localStorage.setItem('order_data', JSON.stringify({
-                total: total,
-                items: contentIds,
-                selectedUpsell1: selectedUpsell1,
-                selectedUpsell2: selectedUpsell2
-            }));
-        }
-
-        window.trackConversion = trackConversion;
-        window.initiateUpsellCheckout = initiateUpsellCheckout;
-    </script>
+    // Expose functions globally
+    window.trackConversion = trackConversion;
+    window.initiateUpsellCheckout = initiateUpsellCheckout;
+</script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1171,8 +1180,8 @@
             </div>
             <div class="cta-wrapper">
                 <button class="btn-primary" onclick="handleCheckout()">
-                    <i class="fas fa-lock" style="margin-right: 12px;"></i> Secure Your Order
-                </button>
+    <i class="fas fa-lock" style="margin-right: 12px;"></i> Secure Your Order
+</button>
             </div>
         </div>
     </section>
