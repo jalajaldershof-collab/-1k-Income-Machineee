@@ -6,145 +6,151 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- Meta Pixel Code -->
-    <script>
-        !function(f,b,e,v,n,t,s)
-        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-        n.queue=[];t=b.createElement(e);t.async=!0;
-        t.src=v;s=b.getElementsByTagName(e)[0];
-        s.parentNode.insertBefore(t,s)}(window, document,'script',
-        'https://connect.facebook.net/en_US/fbevents.js');
-        
-        // Initialize with only what's available
-        (function initPixel() {
-            const getFbc = () => {
-                const cookies = document.cookie.split(';');
-                for (let cookie of cookies) {
-                    const [name, value] = cookie.trim().split('=');
-                    if (name === '_fbc') {
-                        return value;
-                    }
-                }
-                return null;
-            };
+<script>
+    !function(f,b,e,v,n,t,s) {
+        if(f.fbq)return;
+        n=f.fbq=function(){n.callMethod? n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;
+        n.push=n;
+        n.loaded=!0;
+        n.version='2.0';
+        n.queue=[];
+        t=b.createElement(e);
+        t.async=!0;
+        t.src=v;
+        s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)
+    }(window, document,'script', 'https://connect.facebook.net/en_US/fbevents.js');
 
-            const getFbp = () => {
-                const cookies = document.cookie.split(';');
-                for (let cookie of cookies) {
-                    const [name, value] = cookie.trim().split('=');
-                    if (name === '_fbp') {
-                        return value;
-                    }
-                }
-                return null;
-            };
+    // ====== HELPER FUNCTIONS ======
 
-            fbq('init', '1690917758676510', {
-                client_ip_address: '{{client_ip_address}}',
-                client_user_agent: navigator.userAgent,
-                fbp: getFbp() || undefined,
-                fbc: getFbc() || undefined
-            });
+    // Get fbp from cookie
+    function getFbp() {
+        const match = document.cookie.match(/_fbp=([^;]+)/);
+        return match ? match[1] : null;
+    }
 
-            // Track PageView
-            fbq('track', 'PageView', {
-                content_name: 'First Customer System',
-                content_category: 'Digital Product',
-                content_type: 'product'
+    // Get fbc from cookie
+    function getFbc() {
+        const match = document.cookie.match(/_fbc=([^;]+)/);
+        return match ? match[1] : null;
+    }
+
+    // Store fbclid as properly formatted _fbc cookie
+    function storeFbclid() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const fbclid = urlParams.get('fbclid');
+
+        if (fbclid) {
+            // IMPORTANT: fbclid must be formatted as _fbc
+            // Format: fb.1.{timestamp}.{fbclid}
+            const timestamp = Math.floor(Date.now() / 1000);
+            const formattedFbc = 'fb.1.' + timestamp + '.' + fbclid;
+            document.cookie = '_fbc=' + formattedFbc + '; path=/; max-age=7776000';
+        }
+    }
+
+    // ====== STORE FBCLID ON LOAD ======
+    storeFbclid();
+
+    // ====== INITIALIZE PIXEL ======
+    (function initPixel() {
+        const fbp = getFbp();
+        const fbc = getFbc();
+
+        // User data for matching (fbp and fbc go here!)
+        const userData = {};
+
+        // Only add if they exist
+        if (fbp) userData.fbp = fbp;
+        if (fbc) userData.fbc = fbc;
+
+        // Initialize with user data
+        fbq('init', '1690917758676510', userData);
+
+        // Track PageView
+        fbq('track', 'PageView', {
+            content_name: 'First Customer System',
+            content_category: 'Digital Product',
+            content_type: 'product'
+        }, {
+            eventID: 'pageview_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+        });
+    })();
+</script>
+<noscript>
+    <img height="1" width="1" style="display:none"
+        src="https://www.facebook.com/tr?id=1690917758676510&ev=PageView&noscript=1"
+    />
+</noscript>
+<!-- End Meta Pixel Code -->
+
+<!-- Zaraz Tracking Function -->
+<script>
+    // Helper functions (reused from above)
+    function getFbp() {
+        const match = document.cookie.match(/_fbp=([^;]+)/);
+        return match ? match[1] : null;
+    }
+
+    function getFbc() {
+        const match = document.cookie.match(/_fbc=([^;]+)/);
+        return match ? match[1] : null;
+    }
+
+    function trackConversion(eventName, eventData = {}) {
+        const fbp = getFbp();
+        const fbc = getFbc();
+
+        // Build user data
+        const userData = {};
+        if (fbp) userData.fbp = fbp;
+        if (fbc) userData.fbc = fbc;
+
+        const eventID = eventName + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+        const trackingData = {
+            event_name: eventName,
+            user_data: userData,
+            custom_data: {
+                ...eventData,
+                event_source_url: window.location.href,
+                page_title: document.title
+            },
+            event_id: eventID
+        };
+
+        // Track via Zaraz if available
+        if (typeof zaraz !== 'undefined' && zaraz.track) {
+            zaraz.track(eventName, trackingData);
+        }
+
+        // Track via Meta Pixel
+        if (typeof fbq !== 'undefined') {
+            fbq('track', eventName, {
+                ...eventData
             }, {
-                eventID: 'pageview_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
-            });
-        })();
-    </script>
-    <noscript>
-        <img height="1" width="1" style="display:none"
-            src="https://www.facebook.com/tr?id=1690917758676510&ev=PageView&noscript=1"
-        />
-    </noscript>
-    <!-- End Meta Pixel Code -->
-
-    <!-- Zaraz Tracking Function -->
-    <script>
-        function getFbc() {
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                const [name, value] = cookie.trim().split('=');
-                if (name === '_fbc') {
-                    return value;
-                }
-            }
-            return null;
-        }
-
-        function getFbp() {
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                const [name, value] = cookie.trim().split('=');
-                if (name === '_fbp') {
-                    return value;
-                }
-            }
-            return null;
-        }
-
-        function trackConversion(eventName, eventData = {}) {
-            const trackingData = {
-                event_name: eventName,
-                user_data: {
-                    client_ip_address: '{{client_ip_address}}',
-                    client_user_agent: navigator.userAgent,
-                    fbp: getFbp() || undefined,
-                    fbc: getFbc() || undefined
-                },
-                custom_data: {
-                    ...eventData,
-                    event_source_url: window.location.href,
-                    page_title: document.title
-                },
-                event_id: eventName + '_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
-            };
-
-            if (typeof zaraz !== 'undefined' && zaraz.track) {
-                zaraz.track(eventName, trackingData);
-            }
-
-            if (typeof fbq !== 'undefined') {
-                fbq('track', eventName, {
-                    ...eventData,
-                    fbp: getFbp() || undefined,
-                    fbc: getFbc() || undefined
-                }, {
-                    eventID: trackingData.event_id
-                });
-            }
-
-            return trackingData;
-        }
-
-        function storeFbclid() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const fbclid = urlParams.get('fbclid');
-            if (fbclid) {
-                document.cookie = '_fbc=' + fbclid + '; path=/; max-age=7776000';
-            }
-        }
-
-        storeFbclid();
-
-        function trackSubscribeClick() {
-            trackConversion('SubscribedButtonClickt', {
-                content_name: 'First Customer System',
-                content_type: 'product',
-                value: 17,
-                currency: 'USD',
-                content_ids: ['FCS-001']
+                eventID: eventID
             });
         }
 
-        window.trackConversion = trackConversion;
-        window.trackSubscribeClick = trackSubscribeClick;
-    </script>
+        return trackingData;
+    }
+
+    function trackSubscribeClick() {
+        trackConversion('SubscribedButtonClickt', {
+            content_name: 'First Customer System',
+            content_type: 'product',
+            value: 17,
+            currency: 'USD',
+            content_ids: ['FCS-001']
+        });
+    }
+
+    // Expose functions globally
+    window.trackConversion = trackConversion;
+    window.trackSubscribeClick = trackSubscribeClick;
+</script>
 
     <!-- Rest of your HTML remains the same -->
     <meta charset="UTF-8">
